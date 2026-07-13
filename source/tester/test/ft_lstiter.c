@@ -77,6 +77,7 @@ internal void test_ft_lstiter(Tester *tester)
         { .size = {__LINE__, 0} }, // The NULL trap
         { .size = {__LINE__, 1} },
         { .size = {__LINE__, 5} },
+        { .size = {__LINE__, 10} },
     };
     U64 test_count = CountOfStaticArray(tests);
 
