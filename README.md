@@ -4,6 +4,8 @@ Currently up-to-date with Libft subject version 19.2.
 
 This tester executes over 500 tests in under 0.2 seconds.<br>
 
+![Tester UI](assets/tester_ui.png)
+
 # Prerequisites
 *   Linux
 *   GCC compiler
@@ -19,7 +21,6 @@ Pass the path to your compiled `libft.a` archive as the only argument.
 Run the tests:
 ```bash
 ./tester
-
 ```
 For more information (like output files, no-fork mode), run:
 ```bash
