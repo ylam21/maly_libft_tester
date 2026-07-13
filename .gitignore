@@ -1,0 +1,15 @@
+# Compiled Executables
+/tester
+
+# Output files
+failed_reports.txt
+
+# Object files (if you ever change your build system to use them)
+*.o
+
+# Editor/OS temporary files
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
