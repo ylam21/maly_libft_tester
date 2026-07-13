@@ -5,7 +5,7 @@ Currently up-to-date with Libft subject version 19.2.
 This tester executes over 500 tests in under 0.2 seconds.<br>
 
 # Prerequisites
-*   Linux or macOS
+*   Linux
 *   GCC compiler
 *   Your compiled libft.a library
 
