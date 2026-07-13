@@ -46,7 +46,7 @@ internal void print_tester_summary(Tester *tester, F64 time_taken)
     }
     if(tester->total_tests_timedout > 0)
     {
-        summary.size += push_string8_format(scratch.arena, String8Literal("%-15S %u\n"), red_color, String8Literal("Timed-out"), reset, tester->total_tests_timedout).size;
+        summary.size += push_string8_format(scratch.arena, String8Literal("%S%-15S%S %u\n"), red_color, String8Literal("Timed-out"), reset, tester->total_tests_timedout).size;
     }
     if(tester->total_tests_skipped > 0)
     {

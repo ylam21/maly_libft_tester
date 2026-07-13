@@ -89,6 +89,7 @@ internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U
 {
     TestReport test_report = {0};
     TestPayload payload    = {0};
+    S64 bytes_read = 0;
 
     // Set 'F' for failed test as the default.
     U8 character_to_print = 'F';
@@ -104,7 +105,7 @@ internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U
             dup2(tester->dev_null_fd, STDOUT_FILENO);
             dup2(tester->dev_null_fd, STDERR_FILENO);
 
-            alarm(1); // TODO: make this timeout as a variable
+            alarm(1);
 
             TestParameters test_parameters = test_context->tests[test_index];
             payload = test_context->callback(test_parameters);
@@ -116,7 +117,7 @@ internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U
         else if(pid > 0) // Parent Process
         {
             close(pipefd[1]);
-            S64 bytes_read = (S64)read(pipefd[0], &payload, sizeof(payload));
+            bytes_read = (S64)read(pipefd[0], &payload, sizeof(payload));
             close(pipefd[0]);
 
             int status;
@@ -197,7 +198,7 @@ internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U
         test_report.function_parameters      = test_context->tests[test_index];
         test_report.function_return_type     = test_context->function_return_type;
 
-        if(!(test_report.flags & TestReportFlag_ErrorPayloadRead))
+        if(bytes_read == sizeof(payload))
         {
             fill_test_report_from_payload(tester->permanent_arena, &test_report, &payload);
         }
