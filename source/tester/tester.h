@@ -298,7 +298,7 @@ struct Tester
 };
 
 // Globals
-global String8 global_tester_version                         = String8Literal("1.01");
+global String8 global_tester_version                         = String8Literal("1.02");
 global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
 global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
