@@ -28,6 +28,8 @@ internal TestPayload callback_for_lstadd_front(TestParameters test_parameters)
     // Call libft function.
     ft_lstadd_front((t_list **)&head, (t_list *)new_node);
 
+    payload.leak_count = global_allocation_count;
+
     if(head != 0 && head->content != 0)
     {
         U64 got_length = length_of_cstring((char *)head->content) + 1;
@@ -50,7 +52,6 @@ internal TestPayload callback_for_lstadd_front(TestParameters test_parameters)
         free(new_node);
     }
 
-    payload.leak_count = global_allocation_count;
     payload.expected_value = 0;
     payload.got_value      = 0;
 

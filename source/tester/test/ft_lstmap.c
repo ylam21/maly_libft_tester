@@ -64,10 +64,7 @@ internal TestPayload callback_for_lstmap(TestParameters test_parameters)
 
     if((is_perfect) && (old_count == list_size) && (new_count == list_size))
     {
-        if(list_size == 0 || (global_allocation_count == list_size * 2))
-        {
-            payload.flags |= TestPayloadFlag_ResultsMatch;
-        }
+        payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
     char expected_string[64];
@@ -91,6 +88,8 @@ internal TestPayload callback_for_lstmap(TestParameters test_parameters)
         curr_old = next;
     }
 
+    payload.leak_count     = global_allocation_count;
+
     curr_new = new_head;
     while(curr_new != 0)
     {
@@ -100,8 +99,6 @@ internal TestPayload callback_for_lstmap(TestParameters test_parameters)
         curr_new = next;
     }
 
-    // We expect the global allocations to equal list_size * 2, so we override the leak count
-    payload.leak_count     = (global_allocation_count == (S64)(list_size * 2)) ? 0 : global_allocation_count;
     payload.expected_value = 0;
     payload.got_value      = 0;
 

@@ -30,9 +30,7 @@ internal TestPayload callback_for_lstnew(TestParameters test_parameters)
             payload.got_strings_sizes_count = 1;
         }
 
-        if ((got_content == parameters.ptr) &&
-            (got_next == 0) &&
-            (global_allocation_count == 1))
+        if ((got_content == parameters.ptr) && (got_next == 0))
         {
             payload.flags |= TestPayloadFlag_ResultsMatch;
         }

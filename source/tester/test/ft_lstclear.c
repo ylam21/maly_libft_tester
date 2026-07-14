@@ -33,9 +33,7 @@ internal TestPayload callback_for_lstclear(TestParameters test_parameters)
     payload.got_strings_sizes[0] = got_length + 1;
     payload.got_strings_sizes_count = 1;
 
-    if((fake_delete_call_count == expected_size) &&
-        (global_allocation_count == 0) &&
-        (head == 0))
+    if((fake_delete_call_count == expected_size) && (head == 0))
     {
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
