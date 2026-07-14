@@ -44,6 +44,7 @@ internal void parse_command_line_to_tester(Tester *tester, char **arguments, U64
             if((argument_index + 1) < argument_count)
             {
                 tester->output_filename = arguments[argument_index + 1];
+                argument_index += 1;
             }
             else
             {
