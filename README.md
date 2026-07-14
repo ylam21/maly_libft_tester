@@ -1,5 +1,7 @@
 # The Maly Libft Tester
 
+[The Maly Libft Tester Showcase Video on Youtube](https://www.youtube.com/watch?v=XR_jeUo_uzU)
+
 Currently up-to-date with Libft subject version 19.2.
 
 This tester executes over 500 tests in under 0.2 seconds.<br>
