@@ -54,22 +54,22 @@ struct TemporaryArena
 #define ARENA_DEFAULT_FLAGS        0
 
 // Arena creation/destruction
-internal Arena *arena_create_(ArenaParams *params);
+internal_function Arena *arena_create_(ArenaParams *params);
 #define arena_create(...) arena_create_(&(ArenaParams){ .reserve_size = ARENA_DEFAULT_RESERVE_SIZE, .commit_size = ARENA_DEFAULT_COMMIT_SIZE, .flags = ARENA_DEFAULT_FLAGS})
-internal void arena_destroy(Arena *arena);
+internal_function void arena_destroy(Arena *arena);
 
 // Arena push/pop/pos core functions
-internal void *arena_push(Arena *arena, U64 size, U64 alignment, U32 zero);
-internal U64   arena_pos(Arena *arena);
-internal void  arena_pop_to(Arena *arena, U64 pos);
+internal_function void *arena_push(Arena *arena, U64 size, U64 alignment, U32 zero);
+internal_function U64   arena_pos(Arena *arena);
+internal_function void  arena_pop_to(Arena *arena, U64 pos);
 
 // Arena pop helpers
-internal void arena_clear(Arena *arena);
-internal void arena_pop(Arena *arena, U64 amount);
+internal_function void arena_clear(Arena *arena);
+internal_function void arena_pop(Arena *arena, U64 amount);
 
 // Temporary arena scopes
-internal TemporaryArena temporary_arena_begin(Arena *arena);
-internal void temporary_arena_end(TemporaryArena temporary_arena);
+internal_function TemporaryArena temporary_arena_begin(Arena *arena);
+internal_function void temporary_arena_end(TemporaryArena temporary_arena);
 
 // Push helper macros
 #define push_array_no_zero_aligned(arena, data_type, count, alignment) (data_type *)arena_push((arena), sizeof(data_type)*(count), (alignment), 0)

@@ -46,8 +46,8 @@ global ProfilerBlock profiler_blocks[PROFILER_MAX_BLOCK_COUNT] = {0};
 global U32 profiler_current_parent = PROFILER_NULL_PARENT;
 global Profiler profiler = {0};
 
-internal void           profiler_start(void);
-internal ProfilerReport profiler_end(Arena *arena);
+internal_function void           profiler_start(void);
+internal_function ProfilerReport profiler_end(Arena *arena);
 
 #if ENABLE_PROFILER
     #define ProfilerBlockThroughputBegin(id_name, byte_count)                                  \

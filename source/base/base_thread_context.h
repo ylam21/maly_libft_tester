@@ -20,11 +20,11 @@ struct ThreadContext
 // Thread Context Functions
 
 // Thread-context initialization & release
-internal void initialize_thread_context(void);
-internal void thread_context_release(void);
+internal_function void initialize_thread_context(void);
+internal_function void thread_context_release(void);
 
 // Scratch arenas
-internal Arena *get_scratch_arena_from_thread_context(Arena *conflict_arena);
+internal_function Arena *get_scratch_arena_from_thread_context(Arena *conflict_arena);
 
 #define ScratchArenaBegin(conflict_arena) temporary_arena_begin(get_scratch_arena_from_thread_context(conflict_arena))
 #define ScratchArenaEnd(scratch_arena)    temporary_arena_end(scratch_arena)

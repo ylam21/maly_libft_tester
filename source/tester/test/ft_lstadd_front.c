@@ -1,4 +1,5 @@
-internal TestPayload callback_for_lstadd_front(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstadd_front(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     TestParameters_PtrPtr parameters = test_parameters.ptr_ptr;
@@ -58,7 +59,8 @@ internal TestPayload callback_for_lstadd_front(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_lstadd_front(Tester *tester)
+internal_function
+void test_ft_lstadd_front(Tester *tester)
 {
     TestParameters tests[] =
     {

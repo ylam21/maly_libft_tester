@@ -1,22 +1,26 @@
-internal char add_index(unsigned int index, char character)
+internal_function
+char add_index(unsigned int index, char character)
 {
     return((char)(character + index));
 }
 
-internal char return_index_digit(unsigned int index, char character)
+internal_function
+char return_index_digit(unsigned int index, char character)
 {
     (void)character;
     return((char)((index % 10) + '0'));
 }
 
-internal char always_x(unsigned int index, char character)
+internal_function
+char always_x(unsigned int index, char character)
 {
     (void)index;
     (void)character;
     return('X');
 }
 
-internal char upper_odd_characters(unsigned int index, char character)
+internal_function
+char upper_odd_characters(unsigned int index, char character)
 {
     char result;
 
@@ -29,7 +33,8 @@ internal char upper_odd_characters(unsigned int index, char character)
     return(result);
 }
 
-internal char lower_odd_characters(unsigned int index, char character)
+internal_function
+char lower_odd_characters(unsigned int index, char character)
 {
     char result;
 
@@ -42,7 +47,8 @@ internal char lower_odd_characters(unsigned int index, char character)
     return(result);
 }
 
-internal TestPayload callback_for_strmapi(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_strmapi(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -95,7 +101,8 @@ internal TestPayload callback_for_strmapi(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_strmapi(Tester *tester)
+internal_function
+void test_ft_strmapi(Tester *tester)
 {
     TestParameters tests[] =
     {

@@ -36,7 +36,7 @@
 #include <time.h>
 #include <unistd.h>
 
-internal U64    os_get_timestamp(void);
-internal void   os_write_message(String8 message);
+internal_function U64    os_get_timestamp(void);
+internal_function void   os_write_message(String8 message);
 
 #endif // OS_CORE_POSIX_H

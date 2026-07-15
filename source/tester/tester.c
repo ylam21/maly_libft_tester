@@ -1,15 +1,18 @@
 // Tester Functions
-internal String8 tester_get_version(void)
+internal_function
+String8 tester_get_version(void)
 {
     return(global_tester_version);
 }
 
-internal String8 tester_get_supported_libft_subject_version(void)
+internal_function
+String8 tester_get_supported_libft_subject_version(void)
 {
     return(global_tester_supported_libft_subject_version);
 }
 
-internal Tester initialize_tester(void)
+internal_function
+Tester initialize_tester(void)
 {
     Tester tester = {0};
 
@@ -31,7 +34,8 @@ internal Tester initialize_tester(void)
     return(tester);
 }
 
-internal void tester_run(Tester *tester)
+internal_function
+void tester_run(Tester *tester)
 {
     Print("\n--- Testing for Libft Subject Version %S ---\n", tester_get_supported_libft_subject_version());
     Print("\n--- Part 1 - Libc Functions ---\n");

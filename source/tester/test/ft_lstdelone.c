@@ -1,12 +1,14 @@
 global int fake_delete_call_count = 0;
 
-internal void fake_delete_function(void *content)
+internal_function
+void fake_delete_function(void *content)
 {
     (void)content;
     fake_delete_call_count += 1;
 }
 
-internal TestPayload callback_for_lstdelone(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstdelone(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     (void)test_parameters;
@@ -45,7 +47,8 @@ internal TestPayload callback_for_lstdelone(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_lstdelone(Tester *tester)
+internal_function
+void test_ft_lstdelone(Tester *tester)
 {
     TestParameters tests[] =
     {

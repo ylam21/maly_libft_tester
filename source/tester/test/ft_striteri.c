@@ -1,21 +1,25 @@
-internal void make_string_uppercase(unsigned int index, char *character)
+internal_function
+void make_string_uppercase(unsigned int index, char *character)
 {
     (void)index;
     *character = upper_from_char(*character);
 }
 
-internal void replace_with_x(unsigned int index, char *character)
+internal_function
+void replace_with_x(unsigned int index, char *character)
 {
     (void)index;
     *character = 'X';
 }
 
-internal void add_index_to_char(unsigned int index, char *character)
+internal_function
+void add_index_to_char(unsigned int index, char *character)
 {
     *character = (char)(*character + index);
 }
 
-internal TestPayload callback_for_striteri(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_striteri(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -64,7 +68,8 @@ internal TestPayload callback_for_striteri(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_striteri(Tester *tester)
+internal_function
+void test_ft_striteri(Tester *tester)
 {
     TestParameters tests[] =
     {

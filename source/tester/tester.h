@@ -323,9 +323,9 @@ global String8 global_test_report_error_message_table[] =
 };
 
 // Tester Functions
-internal String8    tester_get_version(void);
-internal String8    tester_get_supported_libft_subject_version(void);
-internal void       tester_run(Tester *tester);
-internal Tester     initialize_tester(void);
+internal_function String8    tester_get_version(void);
+internal_function String8    tester_get_supported_libft_subject_version(void);
+internal_function void       tester_run(Tester *tester);
+internal_function Tester     initialize_tester(void);
 
 #endif // TESTER_H

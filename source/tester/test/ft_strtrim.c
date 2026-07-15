@@ -1,4 +1,5 @@
-internal TestPayload callback_for_strtrim(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_strtrim(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -48,7 +49,8 @@ internal TestPayload callback_for_strtrim(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_strtrim(Tester *tester)
+internal_function
+void test_ft_strtrim(Tester *tester)
 {
     TestParameters tests[] =
     {

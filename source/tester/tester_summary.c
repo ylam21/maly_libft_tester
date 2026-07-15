@@ -1,4 +1,5 @@
-internal void print_tester_summary(Tester *tester, F64 time_taken)
+internal_function
+void print_tester_summary(Tester *tester, F64 time_taken)
 {
     TemporaryArena scratch = ScratchArenaBegin(0);
     String8 summary = { .str  = push_array(scratch.arena, U8, 0) };

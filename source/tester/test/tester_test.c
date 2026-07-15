@@ -1,4 +1,5 @@
-internal void fill_test_report_from_payload(Arena *arena, TestReport *test_report, TestPayload *payload)
+internal_function
+void fill_test_report_from_payload(Arena *arena, TestReport *test_report, TestPayload *payload)
 {
     test_report->leak_count               = payload->leak_count;
     test_report->expected_value           = payload->expected_value;
@@ -32,7 +33,8 @@ internal void fill_test_report_from_payload(Arena *arena, TestReport *test_repor
     }
 }
 
-internal void run_and_evaluate_test_no_fork(Tester *tester, TestContext *test_context, U64 test_index)
+internal_function
+void run_and_evaluate_test_no_fork(Tester *tester, TestContext *test_context, U64 test_index)
 {
     TestReport test_report = {0};
     TestPayload payload;
@@ -85,7 +87,8 @@ internal void run_and_evaluate_test_no_fork(Tester *tester, TestContext *test_co
     }
 }
 
-internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_index)
+internal_function
+void run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_index)
 {
     TestReport test_report = {0};
     TestPayload payload    = {0};
@@ -218,7 +221,8 @@ internal void run_and_evaluate_test(Tester *tester, TestContext *test_context, U
     }
 }
 
-internal String8 padding_for_stats(Arena *arena, U32 test_count)
+internal_function
+String8 padding_for_stats(Arena *arena, U32 test_count)
 {
     U64 some_extra_padding = 10;
     U64 padding_size   = TESTER_MAXIMUM_EXPECTED_TESTS_FOR_GROUP - test_count + some_extra_padding;
@@ -228,7 +232,8 @@ internal String8 padding_for_stats(Arena *arena, U32 test_count)
     return(padding);
 }
 
-internal void print_tests_statistics(U64 test_count, U64 failed_test_count, U32 tests_were_skipped)
+internal_function
+void print_tests_statistics(U64 test_count, U64 failed_test_count, U32 tests_were_skipped)
 {
     TemporaryArena scratch = ScratchArenaBegin(0);
     String8 stats;
@@ -252,7 +257,8 @@ internal void print_tests_statistics(U64 test_count, U64 failed_test_count, U32 
     ScratchArenaEnd(scratch);
 }
 
-internal void run_tests(Tester *tester, TestContext *test_context)
+internal_function
+void run_tests(Tester *tester, TestContext *test_context)
 {
     Print("%-20S", test_context->test_group.name);
 

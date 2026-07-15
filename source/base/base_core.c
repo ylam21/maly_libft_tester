@@ -5,21 +5,24 @@
  */
 ////////////////////////////////
 // Safe Casts
-internal U16 safe_cast_u16(U32 x)
+internal_function
+U16 safe_cast_u16(U32 x)
 {
   AssertAlways(x <= max_U16);
   U16 result = (U16)x;
   return result;
 }
 
-internal U32 safe_cast_u32(U64 x)
+internal_function
+U32 safe_cast_u32(U64 x)
 {
   AssertAlways(x <= max_U32);
   U32 result = (U32)x;
   return result;
 }
 
-internal S32 safe_cast_s32(S64 x)
+internal_function
+S32 safe_cast_s32(S64 x)
 {
   AssertAlways(x <= max_S32);
   S32 result = (S32)x;
@@ -69,7 +72,8 @@ global U8 base64_reverse[128] =
 };
 
 // Memory Manipulation Functons
-internal void memory_set_u32(void *memory, U32 value, U64 byte_size)
+internal_function
+void memory_set_u32(void *memory, U32 value, U64 byte_size)
 {
     U32 *pointer    = (U32 *)memory;
     U64 dword_count = byte_size / sizeof(U32);

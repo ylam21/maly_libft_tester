@@ -18,9 +18,9 @@
 
 ////////////////////////////////
 // Codebase Keywords
-#define internal      static // Naming is lowercase to mimic native language keywords for readability
-#define local_persist static
-#define global        static
+#define internal_function static
+#define local_persist     static
+#define global            static
 #define thread_static __thread
 
 ////////////////////////////////
@@ -291,9 +291,9 @@ global const U64 bit64 = (1ull<<63);
 
 ////////////////////////////////
 // Safe Casts
-internal U16 safe_cast_u16(U32 x);
-internal U32 safe_cast_u32(U64 x);
-internal S32 safe_cast_s32(S64 x);
+internal_function U16 safe_cast_u16(U32 x);
+internal_function U32 safe_cast_u32(U64 x);
+internal_function S32 safe_cast_s32(S64 x);
 
 ////////////////////////////////
 // Memory Manipulation Functions

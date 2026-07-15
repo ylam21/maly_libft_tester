@@ -1,4 +1,5 @@
-internal TestPayload callback_for_putnbr_fd(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_putnbr_fd(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     TestParameters_IntPtr parameters = test_parameters.int_ptr;
@@ -47,7 +48,8 @@ internal TestPayload callback_for_putnbr_fd(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_putnbr_fd(Tester *tester)
+internal_function
+void test_ft_putnbr_fd(Tester *tester)
 {
     TestParameters tests[] =
     {

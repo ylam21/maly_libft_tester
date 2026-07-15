@@ -1,4 +1,5 @@
-internal TestPayload callback_for_lstnew(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstnew(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     TestParameters_Ptr parameters = test_parameters.ptr;
@@ -47,7 +48,8 @@ internal TestPayload callback_for_lstnew(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_lstnew(Tester *tester)
+internal_function
+void test_ft_lstnew(Tester *tester)
 {
     TestParameters tests[] =
     {

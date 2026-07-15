@@ -1,4 +1,5 @@
-internal String8 get_memory_view(Arena *arena, void *memory_block)
+internal_function
+String8 get_memory_view(Arena *arena, void *memory_block)
 {
     String8 result =
     {
@@ -24,7 +25,8 @@ internal String8 get_memory_view(Arena *arena, void *memory_block)
     return(result);
 }
 
-internal String8 get_string_view(Arena *arena, void *memory_block)
+internal_function
+String8 get_string_view(Arena *arena, void *memory_block)
 {
     String8 result =
     {
@@ -57,7 +59,8 @@ internal String8 get_string_view(Arena *arena, void *memory_block)
     return(result);
 }
 
-internal U64 push_function_parameters_from_test_report(Arena *arena, TestReport *test_report)
+internal_function
+U64 push_function_parameters_from_test_report(Arena *arena, TestReport *test_report)
 {
     TemporaryArena scratch = ScratchArenaBegin(arena);
     U64 size = 0;
@@ -198,7 +201,8 @@ internal U64 push_function_parameters_from_test_report(Arena *arena, TestReport 
     return(size);
 }
 
-internal U64 push_results_from_test_report(Arena *arena, TestReport *test_report)
+internal_function
+U64 push_results_from_test_report(Arena *arena, TestReport *test_report)
 {
 
     U64 size = 0;
@@ -274,7 +278,8 @@ internal U64 push_results_from_test_report(Arena *arena, TestReport *test_report
     return(size);
 }
 
-internal U64 push_general_error_messages_from_test_report(Arena *arena, TestReport *test_report, TestGroup *test_group)
+internal_function
+U64 push_general_error_messages_from_test_report(Arena *arena, TestReport *test_report, TestGroup *test_group)
 {
     U64 size = 0;
     if(test_report->flags & TestReportFlag_ErrorPipe)
@@ -339,7 +344,8 @@ internal U64 push_general_error_messages_from_test_report(Arena *arena, TestRepo
     return(size);
 }
 
-internal U64 push_debug_information_from_test_report(Arena *arena, TestReport *test_report, TestGroup *test_group)
+internal_function
+U64 push_debug_information_from_test_report(Arena *arena, TestReport *test_report, TestGroup *test_group)
 {
     U64 size = 0;
     size += push_string8_format(arena, String8Literal(">>>(Start of test report)>>>\n")).size;
@@ -359,7 +365,8 @@ internal U64 push_debug_information_from_test_report(Arena *arena, TestReport *t
 }
 
 
-internal U32 build_debug_information_from_tester_and_write_to_fd(int fd, Tester *tester)
+internal_function
+U32 build_debug_information_from_tester_and_write_to_fd(int fd, Tester *tester)
 {
     TemporaryArena scratch = ScratchArenaBegin(0);
     String8 result =

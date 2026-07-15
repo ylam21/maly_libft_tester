@@ -1,4 +1,5 @@
-internal void *fake_map_function(void *content)
+internal_function
+void *fake_map_function(void *content)
 {
     int *old_value = (int *)content;
     int *new_value = (int *)malloc(sizeof(int));
@@ -9,12 +10,14 @@ internal void *fake_map_function(void *content)
     return((void *)new_value);
 }
 
-internal void fake_map_delete_function(void *content)
+internal_function
+void fake_map_delete_function(void *content)
 {
     free(content);
 }
 
-internal TestPayload callback_for_lstmap(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstmap(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     int list_size = (int)test_parameters.size.size;
@@ -105,7 +108,8 @@ internal TestPayload callback_for_lstmap(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_lstmap(Tester *tester)
+internal_function
+void test_ft_lstmap(Tester *tester)
 {
     TestParameters tests[] =
     {

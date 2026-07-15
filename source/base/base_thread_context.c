@@ -7,7 +7,8 @@
 // Thread Context Functions
 
 // Thread-context initialization & release
-internal void initialize_thread_context(void)
+internal_function
+void initialize_thread_context(void)
 {
     Arena **scratch_arena_pool  = thread_local_thread_context.scratch_arenas;
     for(U32 pool_index = 0; pool_index < SCRATCH_ARENA_POOL_SIZE; pool_index += 1)
@@ -16,7 +17,8 @@ internal void initialize_thread_context(void)
     }
 }
 
-internal void thread_context_release(void)
+internal_function
+void thread_context_release(void)
 {
     Arena **scratch_arena_pool  = thread_local_thread_context.scratch_arenas;
     for(U32 pool_index = 0; pool_index < SCRATCH_ARENA_POOL_SIZE; pool_index += 1)
@@ -26,7 +28,8 @@ internal void thread_context_release(void)
 }
 
 // Scratch arenas
-internal Arena *get_scratch_arena_from_thread_context(Arena *conflict_arena)
+internal_function
+Arena *get_scratch_arena_from_thread_context(Arena *conflict_arena)
 {
     Arena **scratch_arena_pool  = thread_local_thread_context.scratch_arenas;
     Arena *result = 0;

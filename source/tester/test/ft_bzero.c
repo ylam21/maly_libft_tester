@@ -1,4 +1,5 @@
-internal TestPayload callback_for_bzero(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_bzero(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -39,7 +40,8 @@ internal TestPayload callback_for_bzero(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_bzero(Tester *tester)
+internal_function
+void test_ft_bzero(Tester *tester)
 {
     U64 memory_block_size = TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE;
     U8 *memory_block      = push_array(tester->testing_arena, U8, memory_block_size);

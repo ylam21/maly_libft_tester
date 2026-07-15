@@ -1,10 +1,12 @@
-internal void profiler_start(void)
+internal_function
+void profiler_start(void)
 {
 	profiler.os_time_start = os_get_timestamp();
 	profiler.profiler_tsc_start = __rdtsc();
 }
 
-internal ProfilerReport profiler_end(Arena *arena)
+internal_function
+ProfilerReport profiler_end(Arena *arena)
 {
     ProfilerReport report = {0};
 

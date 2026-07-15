@@ -1,4 +1,5 @@
-internal void fake_iter_function(void *content)
+internal_function
+void fake_iter_function(void *content)
 {
     int *value = (int *)content;
     if(value != 0)
@@ -7,7 +8,8 @@ internal void fake_iter_function(void *content)
     }
 }
 
-internal TestPayload callback_for_lstiter(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstiter(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     int list_size = (int)test_parameters.size.size;
@@ -70,7 +72,8 @@ internal TestPayload callback_for_lstiter(TestParameters test_parameters)
 
     return(payload);
 }
-internal void test_ft_lstiter(Tester *tester)
+internal_function
+void test_ft_lstiter(Tester *tester)
 {
     TestParameters tests[] =
     {

@@ -1,4 +1,5 @@
-internal String8 get_tester_version(Arena *arena)
+internal_function
+String8 get_tester_version(Arena *arena)
 {
     String8 result = push_string8_format(arena, String8Literal("Version %S\n"
                                                              "This tester version is up-to-date with Libft subject version - %S\n"
@@ -7,7 +8,8 @@ internal String8 get_tester_version(Arena *arena)
     return(result);
 }
 
-internal String8 get_tester_help(void)
+internal_function
+String8 get_tester_help(void)
 {
     String8 result = String8Literal(
         "The Maly Libft Tester - Help\n"
@@ -30,7 +32,8 @@ internal String8 get_tester_help(void)
     return(result);
 }
 
-internal void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument_count)
+internal_function
+void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument_count)
 {
     String8 message;
     TemporaryArena scratch = ScratchArenaBegin(0);

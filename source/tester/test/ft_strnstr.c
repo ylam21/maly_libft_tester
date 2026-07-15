@@ -1,4 +1,5 @@
-internal TestPayload callback_for_strnstr(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_strnstr(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -41,7 +42,8 @@ internal TestPayload callback_for_strnstr(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_strnstr(Tester *tester)
+internal_function
+void test_ft_strnstr(Tester *tester)
 {
     TestParameters tests[] =
     {

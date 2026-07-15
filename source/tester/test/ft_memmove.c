@@ -1,4 +1,5 @@
-internal TestPayload callback_for_memmove(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_memmove(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -54,7 +55,8 @@ internal TestPayload callback_for_memmove(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_memmove(Tester *tester)
+internal_function
+void test_ft_memmove(Tester *tester)
 {
     U64 memory_block_1_size = TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE;
     U64 memory_block_2_size = TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE;

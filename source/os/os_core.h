@@ -17,24 +17,24 @@ struct OS_SystemInfo
 
 ////////////////////////////////
 // System Info
-internal void   initialize_os_system_info(void);
+internal_function void   initialize_os_system_info(void);
 
 ////////////////////////////////
 // Memory Allocation
 
 // basic
-internal void   *os_reserve_memory(U64 size);
-internal U32    os_commit_memory(void *memory, U64 size);
-internal void   os_decommit_memory(void *memory, U64 size);
-internal void   os_release_memory(void *memory, U64 size);
+internal_function void   *os_reserve_memory(U64 size);
+internal_function U32    os_commit_memory(void *memory, U64 size);
+internal_function void   os_decommit_memory(void *memory, U64 size);
+internal_function void   os_release_memory(void *memory, U64 size);
 
 // large pages
-internal void   *os_reserve_large(U64 size);
-internal U32    os_commit_large(void *memory, U64 size);
+internal_function void   *os_reserve_large(U64 size);
+internal_function U32    os_commit_large(void *memory, U64 size);
 
 ////////////////////////////////
 // Aborting
-internal void   os_abort(S32 exit_code);
+internal_function void   os_abort(S32 exit_code);
 
 ////////////////////////////////
 // Globals

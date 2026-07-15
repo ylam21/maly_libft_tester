@@ -71,16 +71,16 @@ union Vec3F64
 
 #define v3f32(x, y, z)                  vec_3f32((x), (y), (z))
 
-internal Vec3F32    vec_3f32(F32 x, F32 y, F32 z);
-internal Vec3F32    add_3f32(Vec3F32 a, Vec3F32 b);
-internal Vec3F32    sub_3f32(Vec3F32 a, Vec3F32 b);
-internal Vec3F32    mul_3f32(Vec3F32 a, Vec3F32 b);
-internal Vec3F32    div_3f32(Vec3F32 a, Vec3F32 b);
-internal Vec3F32    scale_3f32(Vec3F32 v, F32 s);
-internal F32        dot_3f32(Vec3F32 a, Vec3F32 b);
-internal F32        length_squared_3f32(Vec3F32 v);
-internal F32        length_3f32(Vec3F32 v);
-internal Vec3F32    normalize_3f32(Vec3F32 v);
-internal Vec3F32    cross_3f32(Vec3F32 a, Vec3F32 b);
+internal_function Vec3F32    vec_3f32(F32 x, F32 y, F32 z);
+internal_function Vec3F32    add_3f32(Vec3F32 a, Vec3F32 b);
+internal_function Vec3F32    sub_3f32(Vec3F32 a, Vec3F32 b);
+internal_function Vec3F32    mul_3f32(Vec3F32 a, Vec3F32 b);
+internal_function Vec3F32    div_3f32(Vec3F32 a, Vec3F32 b);
+internal_function Vec3F32    scale_3f32(Vec3F32 v, F32 s);
+internal_function F32        dot_3f32(Vec3F32 a, Vec3F32 b);
+internal_function F32        length_squared_3f32(Vec3F32 v);
+internal_function F32        length_3f32(Vec3F32 v);
+internal_function Vec3F32    normalize_3f32(Vec3F32 v);
+internal_function Vec3F32    cross_3f32(Vec3F32 a, Vec3F32 b);
 
 #endif // BASE_MATH_H

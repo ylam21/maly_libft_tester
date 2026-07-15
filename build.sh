@@ -14,7 +14,7 @@ NAME="tester"
 
 # Note: Feel free to change this path.
 #       I recommend to change this to a full path.
-SOURCE_FILE="source/main.c"
+SOURCE_FILE="/home/omaly/repos/maly_libft_tester/source/main.c"
 
 
 # -----------------------------------------------------------------------------

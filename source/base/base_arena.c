@@ -7,7 +7,8 @@
 // Arena Functions
 
 // Arena creation/destruction
-internal Arena *arena_create_(ArenaParams *params)
+internal_function
+Arena *arena_create_(ArenaParams *params)
 {
     U64 reserve_size = params->reserve_size;
     U64 commit_size  = params->commit_size;
@@ -59,7 +60,8 @@ internal Arena *arena_create_(ArenaParams *params)
     return arena;
 }
 
-internal void arena_destroy(Arena *arena)
+internal_function
+void arena_destroy(Arena *arena)
 {
     Arena *current  = arena->current;
     Arena *previous = 0;
@@ -73,7 +75,8 @@ internal void arena_destroy(Arena *arena)
 }
 
 // Arena push/pop core functions
-internal void *arena_push(Arena *arena, U64 size, U64 alignment, U32 zero)
+internal_function
+void *arena_push(Arena *arena, U64 size, U64 alignment, U32 zero)
 {
     Arena *current = arena->current;
     U64 pos_pre    = AlignPow2(current->pos, alignment);
@@ -147,7 +150,8 @@ internal void *arena_push(Arena *arena, U64 size, U64 alignment, U32 zero)
     return result;
 }
 
-internal U64 arena_pos(Arena *arena)
+internal_function
+U64 arena_pos(Arena *arena)
 {
     Arena *current = arena->current;
     U64 pos        = current->base_pos + current->pos;
@@ -155,7 +159,8 @@ internal U64 arena_pos(Arena *arena)
     return(pos);
 }
 
-internal void arena_pop_to(Arena *arena, U64 pos)
+internal_function
+void arena_pop_to(Arena *arena, U64 pos)
 {
     U64 bigger_pos = Max(ARENA_HEADER_SIZE, pos);
 
@@ -173,12 +178,14 @@ internal void arena_pop_to(Arena *arena, U64 pos)
 }
 
 // Arena pop helpers
-internal void arena_clear(Arena *arena)
+internal_function
+void arena_clear(Arena *arena)
 {
     arena_pop_to(arena, 0);
 }
 
-internal void arena_pop(Arena *arena, U64 amount)
+internal_function
+void arena_pop(Arena *arena, U64 amount)
 {
     U64 pos_old = arena_pos(arena);
     U64 pos_new = pos_old;
@@ -190,14 +197,16 @@ internal void arena_pop(Arena *arena, U64 amount)
 }
 
 // Temporary arena scopes
-internal TemporaryArena temporary_arena_begin(Arena *arena)
+internal_function
+TemporaryArena temporary_arena_begin(Arena *arena)
 {
     U64 pos = arena_pos(arena);
     TemporaryArena temporary_arena = {.arena = arena, .saved_pos = pos};
     return temporary_arena;
 }
 
-internal void temporary_arena_end(TemporaryArena temporary_arena)
+internal_function
+void temporary_arena_end(TemporaryArena temporary_arena)
 {
     arena_pop_to(temporary_arena.arena, temporary_arena.saved_pos);
 }

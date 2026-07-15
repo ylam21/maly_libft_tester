@@ -1,4 +1,5 @@
-internal TestPayload callback_for_lstclear(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_lstclear(TestParameters test_parameters)
 {
     TestPayload payload = {0};
     int expected_size = (int)test_parameters.size.size;
@@ -53,7 +54,8 @@ internal TestPayload callback_for_lstclear(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_lstclear(Tester *tester)
+internal_function
+void test_ft_lstclear(Tester *tester)
 {
     TestParameters tests[] =
     {

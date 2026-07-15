@@ -1,4 +1,5 @@
-internal TestPayload callback_for_isalnum(TestParameters test_parameters)
+internal_function
+TestPayload callback_for_isalnum(TestParameters test_parameters)
 {
     TestPayload payload = {0};
 
@@ -30,7 +31,8 @@ internal TestPayload callback_for_isalnum(TestParameters test_parameters)
     return(payload);
 }
 
-internal void test_ft_isalnum(Tester *tester)
+internal_function
+void test_ft_isalnum(Tester *tester)
 {
     TestParameters tests[] =
     {

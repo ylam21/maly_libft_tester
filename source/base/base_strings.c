@@ -3,7 +3,8 @@
 * Copyright (c) Epic Games Tools.
 * Licensed under the MIT license.
 */
-internal U32 string8_match(String8 a, String8 b)
+internal_function
+U32 string8_match(String8 a, String8 b)
 {
     U32 result = 0;
     if (a.size == b.size)
@@ -16,7 +17,8 @@ internal U32 string8_match(String8 a, String8 b)
     return result;
 }
 
-internal U64 length_of_cstring(char *cstring)
+internal_function
+U64 length_of_cstring(char *cstring)
 {
     char *ptr = cstring;
     while(*ptr != '\0')
@@ -28,13 +30,15 @@ internal U64 length_of_cstring(char *cstring)
     return(length);
 }
 
-internal String8 string8_from_cstring(char *cstring)
+internal_function
+String8 string8_from_cstring(char *cstring)
 {
     U64 size = length_of_cstring(cstring);
     return (String8){.str = (U8 *)cstring, .size = size};
 }
 
-internal U64 u64_from_string8(String8 string, U32 radix)
+internal_function
+U64 u64_from_string8(String8 string, U32 radix)
 {
     U64 x = 0;
     if(1 < radix && radix <= 16)
@@ -48,7 +52,8 @@ internal U64 u64_from_string8(String8 string, U32 radix)
     return(x);
 }
 
-internal U32 string8_starts_with(String8 string, String8 prefix)
+internal_function
+U32 string8_starts_with(String8 string, String8 prefix)
 {
     U32 result = 0;
 
@@ -63,7 +68,8 @@ internal U32 string8_starts_with(String8 string, String8 prefix)
     return(result);
 }
 
-internal U32 char_is_digit(U8 c, U32 base)
+internal_function
+U32 char_is_digit(U8 c, U32 base)
 {
     U32 result = 0;
     if(0 < base && base <= 16)
@@ -77,7 +83,8 @@ internal U32 char_is_digit(U8 c, U32 base)
     return(result);
 }
 
-internal U32 string8_has_base10_digits_only(String8 string)
+internal_function
+U32 string8_has_base10_digits_only(String8 string)
 {
     U32 result = 1;
 
@@ -93,32 +100,38 @@ internal U32 string8_has_base10_digits_only(String8 string)
     return(result);
 }
 
-internal U32 char_is_space(U8 c)
+internal_function
+U32 char_is_space(U8 c)
 {
     return (c == ' ' || c == '\n' || c == '\t' || c == '\r' || c == '\f' || c == '\v');
 }
 
-internal U32 char_is_upper(U8 c)
+internal_function
+U32 char_is_upper(U8 c)
 {
   return ('A' <= c && c <= 'Z');
 }
 
-internal U32 char_is_lower(U8 c)
+internal_function
+U32 char_is_lower(U8 c)
 {
     return('a' <= c && c <= 'z');
 }
 
-internal U32 char_is_alpha(U8 c)
+internal_function
+U32 char_is_alpha(U8 c)
 {
     return(char_is_upper(c) || char_is_lower(c));
 }
 
-internal U32 char_is_slash(U8 c)
+internal_function
+U32 char_is_slash(U8 c)
 {
     return(c == '/' || c == '\\');
 }
 
-internal U8 lower_from_char(U8 c)
+internal_function
+U8 lower_from_char(U8 c)
 {
     if(char_is_upper(c))
     {
@@ -127,7 +140,8 @@ internal U8 lower_from_char(U8 c)
     return(c);
 }
 
-internal U8 upper_from_char(U8 c)
+internal_function
+U8 upper_from_char(U8 c)
 {
     if(char_is_lower(c))
     {
@@ -139,7 +153,8 @@ internal U8 upper_from_char(U8 c)
 ////////////////////////////////
 // String8 Format Builder
 
-internal void write_string8_format(int fd, String8 format, ...)
+internal_function
+void write_string8_format(int fd, String8 format, ...)
 {
     TemporaryArena scratch = ScratchArenaBegin(0);
     va_list arguments;
@@ -150,7 +165,8 @@ internal void write_string8_format(int fd, String8 format, ...)
     ScratchArenaEnd(scratch);
 }
 
-internal String8 push_string8_format(Arena *arena, String8 format, ...)
+internal_function
+String8 push_string8_format(Arena *arena, String8 format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
@@ -174,7 +190,8 @@ global String8FormatFunctionHandler function_handler_table[256] =
     ['%'] = handle_percent_literal,
 };
 
-internal FormatOptions format_options_from_format(String8 format, U64 *index)
+internal_function
+FormatOptions format_options_from_format(String8 format, U64 *index)
 {
     FormatOptions format_options =
     {
@@ -217,7 +234,8 @@ internal FormatOptions format_options_from_format(String8 format, U64 *index)
     return format_options;
 }
 
-internal String8 string8_format_builder(Arena *arena, String8 format, va_list args)
+internal_function
+String8 string8_format_builder(Arena *arena, String8 format, va_list args)
 {
     // NOTE:  Everything allocated onto the arena from this point up to the string size
     //        is going to be included in the returned string!
@@ -256,7 +274,8 @@ internal String8 string8_format_builder(Arena *arena, String8 format, va_list ar
     return(result);
 }
 
-internal void handle_char(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_char(Arena *arena, va_list args, FormatOptions *opt)
 {
     U8 c = (U8)va_arg(args, S32);
 
@@ -267,13 +286,15 @@ internal void handle_char(Arena *arena, va_list args, FormatOptions *opt)
     apply_padding(arena, s, opt);
 }
 
-internal void handle_cstring(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_cstring(Arena *arena, va_list args, FormatOptions *opt)
 {
     char* cstring = va_arg(args, char*);
     apply_padding(arena, (String8){.str = (U8 *)cstring, .size = length_of_cstring(cstring)}, opt);
 }
 
-internal U8 my_ftoa_buf(U8 *buffer, F64 val, FormatOptions *opt)
+internal_function
+U8 my_ftoa_buf(U8 *buffer, F64 val, FormatOptions *opt)
 {
     U8 i = 0;
     if (val < 0) { buffer[i++] = '-'; val = -val; }
@@ -300,7 +321,8 @@ internal U8 my_ftoa_buf(U8 *buffer, F64 val, FormatOptions *opt)
     return i;
 }
 
-internal void handle_float(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_float(Arena *arena, va_list args, FormatOptions *opt)
 {
 	F64 val = va_arg(args, F64);
 	U8 buf[32] = {0};
@@ -309,7 +331,8 @@ internal void handle_float(Arena *arena, va_list args, FormatOptions *opt)
 	apply_padding(arena, s, opt);
 }
 
-internal void handle_hex_common(Arena *arena, va_list args, FormatOptions *opt, U8 table[16])
+internal_function
+void handle_hex_common(Arena *arena, va_list args, FormatOptions *opt, U8 table[16])
 {
     U64 val = va_arg(args, U64);
 
@@ -344,17 +367,20 @@ internal void handle_hex_common(Arena *arena, va_list args, FormatOptions *opt, 
     apply_padding(arena, s, opt);
 }
 
-internal void handle_upper_hex(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_upper_hex(Arena *arena, va_list args, FormatOptions *opt)
 {
     handle_hex_common(arena, args, opt, (U8*)"0123456789ABCDEF");
 }
 
-internal void handle_hex(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_hex(Arena *arena, va_list args, FormatOptions *opt)
 {
     handle_hex_common(arena, args, opt, (U8*)"0123456789abcdef");
 }
 
-internal S32 my_stoa_buf(U8 *buf, S32 x)
+internal_function
+S32 my_stoa_buf(U8 *buf, S32 x)
 {
     S32 i = 0;
     S64 nb = x;
@@ -385,7 +411,8 @@ internal S32 my_stoa_buf(U8 *buf, S32 x)
     return i;
 }
 
-internal void handle_int(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_int(Arena *arena, va_list args, FormatOptions *opt)
 {
     S32 val = va_arg(args, S32);
     U8 buffer[32] = {0};
@@ -399,7 +426,8 @@ internal void handle_int(Arena *arena, va_list args, FormatOptions *opt)
     apply_padding(arena, s, opt);
 }
 
-internal void handle_percent_literal(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_percent_literal(Arena *arena, va_list args, FormatOptions *opt)
 {
     (void)args;
 
@@ -411,7 +439,8 @@ internal void handle_percent_literal(Arena *arena, va_list args, FormatOptions *
     apply_padding(arena, s, opt);
 }
 
-internal void handle_hex_ptr(Arena *arena, va_list args, FormatOptions *opt, U8 table[16])
+internal_function
+void handle_hex_ptr(Arena *arena, va_list args, FormatOptions *opt, U8 table[16])
 {
     void *ptr = va_arg(args, void *);
     U64 val = (U64)ptr;
@@ -454,18 +483,21 @@ internal void handle_hex_ptr(Arena *arena, va_list args, FormatOptions *opt, U8 
     apply_padding(arena, s, opt);
 }
 
-internal void handle_ptr(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_ptr(Arena *arena, va_list args, FormatOptions *opt)
 {
     handle_hex_ptr(arena, args, opt, (U8 *)"0123456789abcdef");
 }
 
-internal void handle_string8(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_string8(Arena *arena, va_list args, FormatOptions *opt)
 {
     String8 s = va_arg(args, String8);
     apply_padding(arena, s, opt);
 }
 
-internal U32 my_u64toa_buf(U8 *buf, U64 x)
+internal_function
+U32 my_u64toa_buf(U8 *buf, U64 x)
 {
     U32 i = 0;
 
@@ -492,7 +524,8 @@ internal U32 my_u64toa_buf(U8 *buf, U64 x)
     return i;
 }
 
-internal void handle_u64(Arena *arena, va_list args, FormatOptions *opt)
+internal_function
+void handle_u64(Arena *arena, va_list args, FormatOptions *opt)
 {
     U64 val = va_arg(args, U64);
     U8 buffer[32];
@@ -503,7 +536,8 @@ internal void handle_u64(Arena *arena, va_list args, FormatOptions *opt)
     apply_padding(arena, s, opt);
 }
 
-internal void apply_padding(Arena *arena, String8 s, FormatOptions *opt)
+internal_function
+void apply_padding(Arena *arena, String8 s, FormatOptions *opt)
 {
     if (s.size >= (U64)opt->width)
     {
