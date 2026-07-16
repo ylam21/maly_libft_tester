@@ -64,8 +64,8 @@ TestPayload callback_for_strmapi(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char *got_return = ft_strmapi((const char *)parameters.ptr1, (StrmapiFunction)parameters.ptr2);
@@ -94,75 +94,37 @@ TestPayload callback_for_strmapi(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_strmapi(Tester *tester)
+read_only global TestGroup test_group_ft_strmapi =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Basic Alternating Case (Tests your provided functions)
-        { .ptr_ptr_ptr = {__LINE__, "very nice!", upper_odd_characters, "vErY NiCe!"} },
-        { .ptr_ptr_ptr = {__LINE__, "VERY NICE!", lower_odd_characters, "VeRy nIcE!"} },
-        { .ptr_ptr_ptr = {__LINE__, "abcdef",     upper_odd_characters, "aBcDeF"} },
-
-        // 2. Index Verification (CRITICAL: Catches students who don't pass the right index)
-        // '0'+0='0', '0'+1='1', '0'+2='2', etc.
-        { .ptr_ptr_ptr = {__LINE__, "00000",      add_index,            "01234"} },
-        // 'a'+0='a', 'b'+1='c', 'c'+2='e', 'd'+3='g', 'e'+4='i'
-        { .ptr_ptr_ptr = {__LINE__, "abcde",      add_index,            "acegi"} },
-
-        // Ignores the string entirely, just prints the index
-        { .ptr_ptr_ptr = {__LINE__, "Hello",      return_index_digit,   "01234"} },
-        { .ptr_ptr_ptr = {__LINE__, "42 Prague!", return_index_digit,   "0123456789"} },
-
-        // 3. Complete Overwrites (Tests standard iteration bounds)
-        { .ptr_ptr_ptr = {__LINE__, "Hello",      always_x,             "XXXXX"} },
-        { .ptr_ptr_ptr = {__LINE__, " ",          always_x,             "X"} },
-
-        // 4. Empty Strings (CRITICAL: Must return a valid malloc'd "")
-        { .ptr_ptr_ptr = {__LINE__, "",           upper_odd_characters, ""} },
-        { .ptr_ptr_ptr = {__LINE__, "",           always_x,             ""} },
-        { .ptr_ptr_ptr = {__LINE__, "",           add_index,            ""} },
-
-        // 5. Single Characters
-        { .ptr_ptr_ptr = {__LINE__, "A",          upper_odd_characters, "A"} },
-        { .ptr_ptr_ptr = {__LINE__, "a",          upper_odd_characters, "a"} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_strmapi"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_PtrPtr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_strmapi,
-        .callback       = (TestCallbackFunction)callback_for_strmapi,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr_ptr_ptr = {"very nice!", upper_odd_characters, "vErY NiCe!"} },
+        [1]  = { .ptr_ptr_ptr = {"VERY NICE!", lower_odd_characters, "VeRy nIcE!"} },
+        [2]  = { .ptr_ptr_ptr = {"abcdef",     upper_odd_characters, "aBcDeF"} },
+        [3]  = { .ptr_ptr_ptr = {"00000",      add_index,            "01234"} },
+        [4]  = { .ptr_ptr_ptr = {"abcde",      add_index,            "acegi"} },
+        [5]  = { .ptr_ptr_ptr = {"Hello",      return_index_digit,   "01234"} },
+        [6]  = { .ptr_ptr_ptr = {"42 Prague!", return_index_digit,   "0123456789"} },
+        [7]  = { .ptr_ptr_ptr = {"Hello",      always_x,             "XXXXX"} },
+        [8]  = { .ptr_ptr_ptr = {" ",          always_x,             "X"} },
+        [9]  = { .ptr_ptr_ptr = {"",           upper_odd_characters, ""} },
+        [10] = { .ptr_ptr_ptr = {"",           always_x,             ""} },
+        [11] = { .ptr_ptr_ptr = {"",           add_index,            ""} },
+        [12] = { .ptr_ptr_ptr = {"A",          upper_odd_characters, "A"} },
+        [13] = { .ptr_ptr_ptr = {"a",          upper_odd_characters, "a"} },
+    },
+    .test_count               = 14,
+    .name                     = String8Literal("ft_strmapi"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_PtrPtr,
+    .libft_function           = (void *)ft_strmapi,
+    .callback                 = (TestCallbackFunction)callback_for_strmapi,
+};

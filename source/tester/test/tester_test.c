@@ -1,98 +1,59 @@
-internal_function
-void fill_test_report_from_payload(Arena *arena, TestReport *test_report, TestPayload *payload)
+read_only global TestGroup *global_test_groups[TESTER_MAXIMUM_TEST_GROUP_COUNT] =
 {
-    test_report->leak_count               = payload->leak_count;
-    test_report->expected_value           = payload->expected_value;
-    test_report->got_value                = payload->got_value;
-
-    U64 buffer_offset;
-    buffer_offset = 0;
-    for(U64 string_index = 0; string_index < payload->expected_strings_sizes_count; string_index += 1)
-    {
-        U64 size = payload->expected_strings_sizes[string_index];
-        U8 *destination = push_array(arena, U8, size);
-        U8 *source      = payload->buffer_for_expected + buffer_offset;
-        MemoryCopy(destination, source, size);
-        buffer_offset += size;
-
-        test_report->expected_strings[string_index] = (String8){ .str = destination, .size = size};
-        test_report->expected_strings_count += 1;
-    }
-
-    buffer_offset = 0;
-    for(U64 string_index = 0; string_index < payload->got_strings_sizes_count; string_index += 1)
-    {
-        U64 size = payload->got_strings_sizes[string_index];
-        U8 *destination = push_array(arena, U8, size);
-        U8 *source      = payload->buffer_for_got + buffer_offset;
-        MemoryCopy(destination, source, size);
-        buffer_offset += size;
-
-        test_report->got_strings[string_index] = (String8){ .str = destination, .size = size};
-        test_report->got_strings_count += 1;
-    }
-}
-
-internal_function
-void run_and_evaluate_test_no_fork(Tester *tester, TestContext *test_context, U64 test_index)
-{
-    TestReport test_report = {0};
-    TestPayload payload;
-
-    // Set 'F' for failed test as the default.
-    U8 character_to_print = 'F';
-
-    TestParameters test_parameters = test_context->tests[test_index];
-    payload = test_context->callback(test_parameters);
-
-    if(payload.leak_count > 0)
-    {
-        test_report.flags     |= TestReportFlag_MemoryLeaked;
-        tester->total_tests_leaked += 1;
-        character_to_print = 'M';
-    }
-
-    if(!(payload.flags & TestPayloadFlag_ResultsMatch))
-    {
-        test_report.flags |= TestReportFlag_ResultsDoNotMatch;
-    }
-
-    if(!(payload.leak_count > 0) && (payload.flags & TestPayloadFlag_ResultsMatch))
-    {
-        test_report.flags |= TestReportFlag_TestPassed;
-        tester->total_tests_passed += 1;
-        character_to_print = '.';
-    }
-
-    if(!(test_report.flags & TestReportFlag_TestPassed)) // Only fill test report if test did not pass.
-    {
-        test_report.function_parameters_type = test_context->function_parameters_type;
-        test_report.function_parameters      = test_context->tests[test_index];
-        test_report.function_return_type     = test_context->function_return_type;
-
-        fill_test_report_from_payload(tester->permanent_arena, &test_report, &payload);
-
-        test_context->test_group.failed_test_reports[test_context->test_group.failed_test_reports_count] = test_report;
-        test_context->test_group.failed_test_reports_count += 1;
-        tester->total_tests_failed += 1;
-    }
-
-    if(tester->flags & TesterFlag_DisableColors)
-    {
-        Print("%c", character_to_print);
-    }
-    else
-    {
-        Print("%S", global_color_table_for_characters[character_to_print]);
-    }
-}
+    // Libc Functions
+    [0]  = &test_group_ft_isalpha,
+    [1]  = &test_group_ft_isdigit,
+    [2]  = &test_group_ft_isalnum,
+    [3]  = &test_group_ft_isascii,
+    [4]  = &test_group_ft_isprint,
+    [5]  = &test_group_ft_strlen,
+    [6]  = &test_group_ft_memset,
+    [7]  = &test_group_ft_bzero,
+    [8]  = &test_group_ft_memcpy,
+    [9]  = &test_group_ft_memmove,
+    [10] = &test_group_ft_strlcpy,
+    [11] = &test_group_ft_strlcat,
+    [12] = &test_group_ft_toupper,
+    [13] = &test_group_ft_tolower,
+    [14] = &test_group_ft_strchr,
+    [15] = &test_group_ft_strncmp,
+    [16] = &test_group_ft_memchr,
+    [17] = &test_group_ft_memcmp,
+    [18] = &test_group_ft_strnstr,
+    [19] = &test_group_ft_atoi,
+    [20] = &test_group_ft_calloc,
+    [21] = &test_group_ft_strdup,
+    // Additional Functions
+    [22] = &test_group_ft_substr,
+    [23] = &test_group_ft_strjoin,
+    [24] = &test_group_ft_strtrim,
+    [25] = &test_group_ft_split,
+    [26] = &test_group_ft_itoa,
+    [27] = &test_group_ft_strmapi,
+    [28] = &test_group_ft_striteri,
+    [29] = &test_group_ft_putchar_fd,
+    [30] = &test_group_ft_putstr_fd,
+    [31] = &test_group_ft_putendl_fd,
+    [32] = &test_group_ft_putnbr_fd,
+    // Linked List Functions
+    [33] = &test_group_ft_lstnew,
+    [34] = &test_group_ft_lstadd_front,
+    [35] = &test_group_ft_lstsize,
+    [36] = &test_group_ft_lstlast,
+    [37] = &test_group_ft_lstadd_back,
+    [38] = &test_group_ft_lstdelone,
+    [39] = &test_group_ft_lstclear,
+    [40] = &test_group_ft_lstiter,
+    [41] = &test_group_ft_lstmap,
+};
 
 internal_function
-void run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_index)
+void run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group, U64 test_index, U32 *header_was_not_copied)
 {
-    TestReport test_report = {0};
+    TestReportFlags flags = 0;
+    S64 error_code = 0;
     TestPayload payload    = {0};
-    S64 bytes_read = 0;
+    S64 bytes_read         = 0;
 
     // Set 'F' for failed test as the default.
     U8 character_to_print = 'F';
@@ -105,13 +66,13 @@ void run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_i
         {
             close(pipefd[0]);
 
-            dup2(tester->dev_null_fd, STDOUT_FILENO);
-            dup2(tester->dev_null_fd, STDERR_FILENO);
+            dup2(global_dev_null_fd, STDOUT_FILENO);
+            dup2(global_dev_null_fd, STDERR_FILENO);
 
             alarm(1);
 
-            TestParameters test_parameters = test_context->tests[test_index];
-            payload = test_context->callback(test_parameters);
+            TestParameters test_parameters = test_group->tests[test_index];
+            payload = test_group->callback(test_parameters);
 
             write(pipefd[1], &payload, sizeof(payload));
             close(pipefd[1]);
@@ -134,90 +95,99 @@ void run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_i
                         {
                             if(payload.leak_count > 0)
                             {
-                                test_report.flags     |= TestReportFlag_MemoryLeaked;
-                                tester->total_tests_leaked += 1;
+                                flags |= TestReportFlag_MemoryLeaked;
+                                test_worker->local_tests_leaked += 1;
                                 character_to_print = 'M';
                             }
                             if(!(payload.flags & TestPayloadFlag_ResultsMatch))
                             {
-                                test_report.flags |= TestReportFlag_ResultsDoNotMatch;
+                                flags |= TestReportFlag_ResultsDoNotMatch;
                             }
                             if(!(payload.leak_count > 0) && (payload.flags & TestPayloadFlag_ResultsMatch))
                             {
-                                test_report.flags |= TestReportFlag_TestPassed;
-                                tester->total_tests_passed += 1;
+                                flags |= TestReportFlag_TestPassed;
+                                test_worker->local_tests_passed += 1;
                                 character_to_print = '.';
                             }
                         }
                         else
                         {
-                            test_report.flags |= TestReportFlag_ErrorPayloadRead;
+                            flags |= TestReportFlag_ErrorPayloadRead;
                         }
                     }
                     else
                     {
-                        test_report.flags     |= TestReportFlag_ErrorExitNonZero;
-                        test_report.error_code = WEXITSTATUS(status);
+                        flags     |= TestReportFlag_ErrorExitNonZero;
+                        error_code = WEXITSTATUS(status);
                     }
                 }
                 else if(WIFSIGNALED(status))
                 {
                     if(WTERMSIG(status) == SIGALRM)
                     {
-                        test_report.flags |= TestReportFlag_ErrorTimeout;
-                        tester->total_tests_timedout += 1;
+                        flags |= TestReportFlag_ErrorTimeout;
+                        test_worker->local_tests_timedout += 1;
                         character_to_print = 'T';
                     }
                     else
                     {
-                        test_report.flags |= TestReportFlag_ErrorChildCrashed;
-                        tester->total_tests_crashed += 1;
+                        flags |= TestReportFlag_ErrorChildCrashed;
+                        test_worker->local_tests_crashed += 1;
                         character_to_print = 'C';
                     }
-                    test_report.error_code  = WTERMSIG(status);
+                    error_code  = WTERMSIG(status);
                 }
             }
             else
             {
-                test_report.flags      |= TestReportFlag_ErrorErrnoSet;
-                test_report.error_code  = errno;
+                flags      |= TestReportFlag_ErrorErrnoSet;
+                error_code  = errno;
             }
         }
         else
         {
-            test_report.flags |= TestReportFlag_ErrorFork;
+            flags |= TestReportFlag_ErrorFork;
             close(pipefd[0]);
             close(pipefd[1]);
         }
     }
     else
     {
-        test_report.flags |= TestReportFlag_ErrorPipe;
+        flags |= TestReportFlag_ErrorPipe;
     }
 
-    if(!(test_report.flags & TestReportFlag_TestPassed)) // Only fill test report if test did not pass.
-    {
-        test_report.function_parameters_type = test_context->function_parameters_type;
-        test_report.function_parameters      = test_context->tests[test_index];
-        test_report.function_return_type     = test_context->function_return_type;
 
-        if(bytes_read == sizeof(payload))
+    if(!(flags & TestReportFlag_TestPassed))
+    {
+        test_worker->local_tests_failed += 1;
+
+        TemporaryArena scratch = ScratchArenaBegin(0);
+
+        TestReport test_report =
         {
-            fill_test_report_from_payload(tester->permanent_arena, &test_report, &payload);
-        }
+            .flags        = flags,
+            .error_code   = error_code,
+            .test_group   = test_group,
+            .test_payload = &payload,
+            .test_index   = test_index,
+        };
+        String8 debug_info = debug_info_from_test_report(scratch.arena, &test_report, header_was_not_copied);
+        MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, debug_info);
+        test_worker->local_test_groups_report.size += debug_info.size;
 
-        test_context->test_group.failed_test_reports[test_context->test_group.failed_test_reports_count] = test_report;
-        test_context->test_group.failed_test_reports_count += 1;
-        tester->total_tests_failed += 1;
+        ScratchArenaEnd(scratch);
     }
 
-    if(tester->flags & TesterFlag_DisableColors)
+    // Copy the character_to_print
+    if(test_worker->flags & TesterFlag_NoColors)
     {
-        Print("%c", character_to_print);
+        MemoryCopy(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, &character_to_print, sizeof(U8));
+        test_worker->local_test_groups_summary.size += sizeof(U8);
     }
     else
     {
-        Print("%S", global_color_table_for_characters[character_to_print]);
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, global_color_table_for_characters[character_to_print]);
+        test_worker->local_test_groups_summary.size += global_color_table_for_characters[character_to_print].size;
     }
 }
 
@@ -225,7 +195,7 @@ internal_function
 String8 padding_for_stats(Arena *arena, U32 test_count)
 {
     U64 some_extra_padding = 10;
-    U64 padding_size   = TESTER_MAXIMUM_EXPECTED_TESTS_FOR_GROUP - test_count + some_extra_padding;
+    U64 padding_size   = TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT - test_count + some_extra_padding;
     U8 *padding_buffer = push_array(arena, U8, padding_size);
     MemorySet(padding_buffer, ' ', padding_size);
     String8 padding = (String8){.str = padding_buffer, .size = padding_size};
@@ -233,66 +203,85 @@ String8 padding_for_stats(Arena *arena, U32 test_count)
 }
 
 internal_function
-void print_tests_statistics(U64 test_count, U64 failed_test_count, U32 tests_were_skipped)
+void *worker_thread_routine(void *params)
 {
-    TemporaryArena scratch = ScratchArenaBegin(0);
+    TestWorkerContext *test_worker = (TestWorkerContext *)params;
+
+    String8 tester_start_header;
     String8 stats;
     String8 padding;
     String8 stats_with_padding;
+    String8 name_with_padding;
 
-    if(tests_were_skipped)
+    TemporaryArena scratch = ScratchArenaBegin(0);
+    if(test_worker->test_group_start_index == 0)
     {
-        stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_count);
-        padding = padding_for_stats(scratch.arena, global_symbol_missing_text.size - 5);
-        stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S%S\n"), global_symbol_missing_text, padding, stats);
+        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Testing for Libft Subject Version %S ---\n"
+                                                                                "\n--- Part 1 - Libc Functions ---\n"), tester_get_supported_libft_subject_version());
     }
-    else
+    else if(test_worker->test_group_start_index == 22)
     {
-        stats   = push_string8_format(scratch.arena, String8Literal("%2u / %2u"), test_count - failed_test_count, test_count);
-        padding = padding_for_stats(scratch.arena, test_count);
-        stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S\n"), padding, stats);
+        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 2 - Additional Functions ---\n"));
     }
-    write(STDOUT_FILENO, stats_with_padding.str, stats_with_padding.size);
-
-    ScratchArenaEnd(scratch);
-}
-
-internal_function
-void run_tests(Tester *tester, TestContext *test_context)
-{
-    Print("%-20S", test_context->test_group.name);
-
-    U64 test_count_to_run = test_context->test_count;
-    if(test_context->libft_function != 0)
+    else if(test_worker->test_group_start_index == 33)
     {
-        tester->total_groups_tested += 1;
+        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 3 - Linked List Functions ---\n"));
+    }
 
-        if(tester->flags & TesterFlag_NoForkMode)
+    MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+    test_worker->local_test_groups_summary.size += tester_start_header.size;
+
+    for(U64 test_group_index = test_worker->test_group_start_index; test_group_index < test_worker->test_group_end_index; test_group_index += 1)
+    {
+        TestGroup *test_group = global_test_groups[test_group_index];
+
+        U32 test_count = test_group->test_count;
+        U32 local_tests_passed_before = test_worker->local_tests_passed;
+
+        // Copy the group name
+        name_with_padding = push_string8_format(scratch.arena, String8Literal("%-20S"), test_group->name);
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, name_with_padding);
+        test_worker->local_test_groups_summary.size += name_with_padding.size;
+
+        if(test_group->libft_function != 0)
         {
-            for(U32 test_index = 0; test_index < test_count_to_run; test_index += 1)
+            U32 header_was_not_copied = 1;
+            test_worker->local_test_groups_tested += 1;
+            for(U64 test_index = 0; test_index < test_count; test_index += 1)
             {
-                run_and_evaluate_test_no_fork(tester, test_context, test_index);
+                run_and_evaluate_test(test_worker, test_group, test_index, &header_was_not_copied);
             }
+            U32 local_tests_passed_after = test_worker->local_tests_passed;
+
+            U32 local_failed_test_count = test_count - (local_tests_passed_after - local_tests_passed_before);
+            if(local_failed_test_count != 0) // Copy footer
+            {
+                String8 footer = push_string8_format(scratch.arena, String8Literal("(End of debug information for failed test group %S\n)"
+                                                                                   "Total failed tests for this group was %u\n)"
+                                                                                   "----------------------------------------\n"), test_group->name, local_failed_test_count);
+                // Copy the stats
+                MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, footer);
+                test_worker->local_test_groups_report.size += footer.size;
+            }
+
+            stats   = push_string8_format(scratch.arena, String8Literal("%2u / %2u"), local_tests_passed_after - local_tests_passed_before, test_count);
+            padding = padding_for_stats(scratch.arena, test_count);
+            stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S\n"), padding, stats);
         }
         else
         {
-            for(U32 test_index = 0; test_index < test_count_to_run; test_index += 1)
-            {
-                run_and_evaluate_test(tester, test_context, test_index);
-            }
+            test_worker->local_tests_skipped += test_count;
+            stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_count);
+            padding = padding_for_stats(scratch.arena, global_symbol_missing_text.size - 5);
+            stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S%S\n"), global_symbol_missing_text, padding, stats);
         }
-    }
-    else
-    {
-        test_context->flags |= TestContextFlag_TestsWereSkipped;
-        tester->total_tests_skipped += test_count_to_run;
+
+        // Copy the stats
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
+        test_worker->local_test_groups_summary.size += stats_with_padding.size;
     }
 
-    print_tests_statistics(test_count_to_run, test_context->test_group.failed_test_reports_count, test_context->flags & TestContextFlag_TestsWereSkipped);
+    ScratchArenaEnd(scratch);
 
-    if(test_context->test_group.failed_test_reports_count > 0)
-    {
-        tester->failed_groups[tester->failed_groups_count] = test_context->test_group;
-        tester->failed_groups_count += 1;
-    }
+    return(0);
 }

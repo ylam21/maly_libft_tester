@@ -23,13 +23,13 @@ TestPayload callback_for_lstadd_front(TestParameters test_parameters)
 
     t_list *head = old_head;
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function.
     ft_lstadd_front((t_list **)&head, (t_list *)new_node);
 
-    payload.leak_count = global_allocation_count;
+    payload.leak_count = thread_static_allocation_count;
 
     if(head != 0 && head->content != 0)
     {
@@ -59,49 +59,23 @@ TestPayload callback_for_lstadd_front(TestParameters test_parameters)
     return(payload);
 }
 
-internal_function
-void test_ft_lstadd_front(Tester *tester)
+read_only global TestGroup test_group_ft_lstadd_front =
 {
-    TestParameters tests[] =
+    .tests =
     {
         // ptr1: Content of the existing list (0 means empty list)
         // ptr2: Content of the new node being added to the front
-
-        { .ptr_ptr = {__LINE__, "Old Head", "New Head"} },
-        { .ptr_ptr = {__LINE__, "World",    "Hello"} },
-        { .ptr_ptr = {__LINE__, 0,          "First Node"} },
-        { .ptr_ptr = {__LINE__, "Old Head", ""} },
-        { .ptr_ptr = {__LINE__, "",         "New Head"} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_lstadd_front"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Void,
-        .function_parameters_type = TestParametersType_PtrPtr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_lstadd_front,
-        .callback       = (TestCallbackFunction)callback_for_lstadd_front,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .ptr_ptr = {"Old Head", "New Head"} },
+        [1] = { .ptr_ptr = {"World",    "Hello"} },
+        [2] = { .ptr_ptr = {0,          "First Node"} },
+        [3] = { .ptr_ptr = {"Old Head", ""} },
+        [4] = { .ptr_ptr = {"",         "New Head"} },
+    },
+    .test_count               = 5,
+    .name                     = String8Literal("ft_lstadd_front"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Void,
+    .function_parameters_type = TestParametersType_PtrPtr,
+    .libft_function           = (void *)ft_lstadd_front,
+    .callback                 = (TestCallbackFunction)callback_for_lstadd_front,
+};

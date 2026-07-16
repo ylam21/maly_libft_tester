@@ -15,8 +15,8 @@ TestPayload callback_for_memchr(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     void *got_return = ft_memchr((const void *)parameters.ptr, (int)parameters.a,(size_t)parameters.size);
@@ -33,83 +33,46 @@ TestPayload callback_for_memchr(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_memchr(Tester *tester)
+read_only global TestGroup test_group_ft_memchr =
 {
-    TestParameters tests[] =
+    .tests =
     {
         // Note: Passing NULL pointer to memchr results in undefined behaviour. Do not write such tests.
         // Note: memchr MUST cast the 'int' to 'unsigned char' internally.
         //       If ft_memchr compares using (char) some tests will be resolved as failed.
-
-        // 1. Basic Standard Finds
-        { .ptr_int_size = {__LINE__, "Hello", 'H',  6} },
-        { .ptr_int_size = {__LINE__, "Hello", 'l',  6} },
-        { .ptr_int_size = {__LINE__, "Hello", 'o',  6} },
-        { .ptr_int_size = {__LINE__, "Hello", 'z',  6} },
-        { .ptr_int_size = {__LINE__, "Hello", 'o',  2} },
-        { .ptr_int_size = {__LINE__, "Hello", 'H',  0} },
-        { .ptr_int_size = {__LINE__, "Hello", '\0', 6} },
-        { .ptr_int_size = {__LINE__, "Hello", '\0', 5} },
-
-        // 2. Casting Traps
-        { .ptr_int_size = {__LINE__, "Find \xff the trap", -1,   15} }, // -1 cast to unsigned char is 255 (\xff)
-        { .ptr_int_size = {__LINE__, "Find \xff the trap", 255,  15} }, // Same as above, checking positive overflow
-        { .ptr_int_size = {__LINE__, "Find \x80 the trap", -128, 15} }, // -128 cast to unsigned char is 128 (\x80)
-
-        // 3. Integer Overflow Casting Trap
-        { .ptr_int_size = {__LINE__, "Hello", 'H' + 256, 6} }, // 'H' + 256 = 328. Cast to unsigned char, it wraps back to 72 ('H').
-
-        // 4. Boundary & Off-By-One Traps
-        { .ptr_int_size = {__LINE__, "42Prague", 'e', 8} }, // Target is the exact last byte allowed
-        { .ptr_int_size = {__LINE__, "42Prague", 'e', 7} }, // Target is exactly one byte out of bounds (Should return NULL)
-        { .ptr_int_size = {__LINE__, "42Prague", 'P', 1} }, // Size is 1, target is at index 2 (Should return NULL)
-
-        // 5. Raw Memory Traps (Ignoring Null Terminators)
-        { .ptr_int_size = {__LINE__, "a\0b\0c\0d", 'c', 8} }, // Must search past the first two null bytes
-        { .ptr_int_size = {__LINE__, "a\0b\0c\0d", 'd', 8} }, // Must search past three null bytes
-        { .ptr_int_size = {__LINE__, "a\0b\0c\0d", 'x', 8} }, // Should search the whole buffer and return NULL
-
-        // 6. Multiple Occurrences
-        { .ptr_int_size = {__LINE__, "mississippi", 's', 12} },
-        { .ptr_int_size = {__LINE__, "mississippi", 'p', 12} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_memchr"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_PtrIntSize,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_memchr,
-        .callback       = (TestCallbackFunction)callback_for_memchr,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr_int_size = {"Hello", 'H',  6} },
+        [1]  = { .ptr_int_size = {"Hello", 'l',  6} },
+        [2]  = { .ptr_int_size = {"Hello", 'o',  6} },
+        [3]  = { .ptr_int_size = {"Hello", 'z',  6} },
+        [4]  = { .ptr_int_size = {"Hello", 'o',  2} },
+        [5]  = { .ptr_int_size = {"Hello", 'H',  0} },
+        [6]  = { .ptr_int_size = {"Hello", '\0', 6} },
+        [7]  = { .ptr_int_size = {"Hello", '\0', 5} },
+        [8]  = { .ptr_int_size = {"Find \xff the trap", -1,   15} }, // -1 cast to unsigned char is 255 (\xff)
+        [9]  = { .ptr_int_size = {"Find \xff the trap", 255,  15} }, // Same as above, checking positive overflow
+        [10] = { .ptr_int_size = {"Find \x80 the trap", -128, 15} }, // -128 cast to unsigned char is 128 (\x80)
+        [11] = { .ptr_int_size = {"Hello", 'H' + 256, 6} }, // 'H' + 256 = 328. Cast to unsigned char, it wraps back to 72 ('H').
+        [12] = { .ptr_int_size = {"42Prague", 'e', 8} }, // Target is the exact last byte allowed
+        [13] = { .ptr_int_size = {"42Prague", 'e', 7} }, // Target is exactly one byte out of bounds (Should return NULL)
+        [14] = { .ptr_int_size = {"42Prague", 'P', 1} }, // Size is 1, target is at index 2 (Should return NULL)
+        [15] = { .ptr_int_size = {"a\0b\0c\0d", 'c', 8} }, // Must search past the first two null bytes
+        [16] = { .ptr_int_size = {"a\0b\0c\0d", 'd', 8} }, // Must search past three null bytes
+        [17] = { .ptr_int_size = {"a\0b\0c\0d", 'x', 8} }, // Should search the whole buffer and return NULL
+        [18] = { .ptr_int_size = {"mississippi", 's', 12} },
+        [19] = { .ptr_int_size = {"mississippi", 'p', 12} },
+    },
+    .test_count               = 20,
+    .name                     = String8Literal("ft_memchr"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_PtrIntSize,
+    .libft_function           = (void *)ft_memchr,
+    .callback                 = (TestCallbackFunction)callback_for_memchr,
+};

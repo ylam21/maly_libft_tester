@@ -13,8 +13,8 @@ TestPayload callback_for_isprint(TestParameters test_parameters)
     //    • 0 if the character does not match
     expected_return = MinimumBetween(expected_return, 1);
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function.
     int got_return = ft_isprint((int)parameters.a);
@@ -24,77 +24,42 @@ TestPayload callback_for_isprint(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_isprint(Tester *tester)
+read_only global TestGroup test_group_ft_isprint =
 {
-    TestParameters tests[] =
+    .tests =
     {
         // Note: isprint argument 'c' must have the value of an unsigned char or EOF. (https://man7.org/linux/man-pages/man3/isspace.3.html)
         //       Do not write any test that does not follow this rule.
         // Note: Unsigned char has the range 0 - 255.
-
-        // Extremes
-        { .single_int = {__LINE__, EOF} },
-        { .single_int = {__LINE__, 0  } },     // NUL (Non-printable)
-        { .single_int = {__LINE__, 255} },     // Max unsigned char (Non-printable)
-
-        // Lower Printable Boundary (Space)
-        { .single_int = {__LINE__, 31 } },     // Unit Separator (Just below range)
-        { .single_int = {__LINE__, ' '} },     // 32: Space (CRITICAL: Lowest printable)
-        { .single_int = {__LINE__, '!'} },     // 33: Exclamation (Printable)
-
-        // Upper Printable Boundary (Tilde)
-        { .single_int = {__LINE__, '}'} },     // 125: Right brace (Printable)
-        { .single_int = {__LINE__, '~'} },     // 126: Tilde (CRITICAL: Highest printable)
-        { .single_int = {__LINE__, 127} },     // 127: DEL (Just above range, Non-printable)
-        { .single_int = {__LINE__, 128} },     // Extended ASCII (Non-printable)
-
-        // The "Whitespace" Trap (isprint only allows ' ', not tabs/newlines)
-        { .single_int = {__LINE__, '\t'} },    // 9: Tab
-        { .single_int = {__LINE__, '\n'} },    // 10: Newline
-        { .single_int = {__LINE__, '\r'} },    // 13: Carriage return
-
-        // Standard middle-range characters
-        { .single_int = {__LINE__, 'A'} },
-        { .single_int = {__LINE__, 'm'} },
-        { .single_int = {__LINE__, '7'} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_isprint"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Int,
-        .function_parameters_type = TestParametersType_Int,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_isprint,
-        .callback       = (TestCallbackFunction)callback_for_isprint,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .single_int = {EOF} },
+        [1]  = { .single_int = {0  } },     // NUL (Non-printable)
+        [2]  = { .single_int = {255} },     // Max unsigned char (Non-printable)
+        [3]  = { .single_int = {31 } },     // Unit Separator (Just below range)
+        [4]  = { .single_int = {' '} },     // 32: Space (CRITICAL: Lowest printable)
+        [5]  = { .single_int = {'!'} },     // 33: Exclamation (Printable)
+        [6]  = { .single_int = {'}'} },     // 125: Right brace (Printable)
+        [7]  = { .single_int = {'~'} },     // 126: Tilde (CRITICAL: Highest printable)
+        [8]  = { .single_int = {127} },     // 127: DEL (Just above range, Non-printable)
+        [9]  = { .single_int = {128} },     // Extended ASCII (Non-printable)
+        [10] = { .single_int = {'\t'} },    // 9: Tab
+        [11] = { .single_int = {'\n'} },    // 10: Newline
+        [12] = { .single_int = {'\r'} },    // 13: Carriage return
+        [13] = { .single_int = {'A'} },
+        [14] = { .single_int = {'m'} },
+        [15] = { .single_int = {'7'} },
+    },
+    .test_count               = 16,
+    .name                     = String8Literal("ft_isprint"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Int,
+    .function_parameters_type = TestParametersType_Int,
+    .libft_function           = (void *)ft_isprint,
+    .callback                 = (TestCallbackFunction)callback_for_isprint,
+};

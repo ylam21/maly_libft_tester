@@ -7,14 +7,12 @@
 // are rendered with irregular padding, breaking the visual alignment of the output.
 
 // Tester Default Settings
-#define TESTER_DEFAULT_FLAGS                       0
-#define TESTER_DEFAULT_OUTPUT_FILENAME             "failed_reports.txt"
-#define TESTER_MAXIMUM_LIBFT_FUNCTION_COUNT        42 // 42 was counted in test/tester_test.h
-#define TESTER_MAXIMUM_EXPECTED_TESTS_FOR_GROUP    26 // Currently, max tests written is 26 tests for ft_memmove
+#define TESTER_DEFAULT_FLAGS                    0
+#define TESTER_DEFAULT_OUTPUT_FILENAME          "failed_reports.txt"
+#define TESTER_MAXIMUM_TEST_GROUP_COUNT         42 // 42 was counted in source/tester/tester.c
+#define TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT    26 // Currently, max tests written is 26 tests for ft_memmove
 
 // Tester Types
-typedef U32 TestLineNumber;
-
 typedef U8 TestReturnType;
 enum
 {
@@ -28,14 +26,12 @@ enum
 typedef struct TestParameters_Int TestParameters_Int;
 struct TestParameters_Int
 {
-    TestLineNumber    test_line_number;
     S64               a;
 };
 
 typedef struct TestParameters_Ptr TestParameters_Ptr;
 struct TestParameters_Ptr
 {
-    TestLineNumber     test_line_number;
     void               *ptr;
 };
 
@@ -43,7 +39,6 @@ struct TestParameters_Ptr
 typedef struct TestParameters_IntPtr TestParameters_IntPtr;
 struct TestParameters_IntPtr
 {
-    TestLineNumber     test_line_number;
     S64                a;
     void               *ptr;
 };
@@ -51,7 +46,6 @@ struct TestParameters_IntPtr
 typedef struct TestParameters_PtrPtrSize TestParameters_PtrPtrSize;
 struct TestParameters_PtrPtrSize
 {
-    TestLineNumber      test_line_number;
     void                *ptr1;
     void                *ptr2;
     U64                 size;
@@ -60,7 +54,6 @@ struct TestParameters_PtrPtrSize
 typedef struct TestParameters_PtrSize TestParameters_PtrSize;
 struct TestParameters_PtrSize
 {
-    TestLineNumber      test_line_number;
     void                *ptr;
     U64                 size;
 };
@@ -68,7 +61,6 @@ struct TestParameters_PtrSize
 typedef struct TestParameters_PtrIntSize TestParameters_PtrIntSize;
 struct TestParameters_PtrIntSize
 {
-    TestLineNumber      test_line_number;
     void                *ptr;
     S64                 a;
     U64                 size;
@@ -77,7 +69,6 @@ struct TestParameters_PtrIntSize
 typedef struct TestParameters_PtrChar TestParameters_PtrChar;
 struct TestParameters_PtrChar
 {
-    TestLineNumber      test_line_number;
     void                *ptr;
     S64                 c;
 };
@@ -85,7 +76,6 @@ struct TestParameters_PtrChar
 typedef struct TestParameters_PtrCharPtrSize TestParameters_PtrCharPtrSize;
 struct TestParameters_PtrCharPtrSize
 {
-    TestLineNumber      test_line_number;
     void                *ptr1;
     S64                 c;
     void                *ptr2;
@@ -95,7 +85,6 @@ struct TestParameters_PtrCharPtrSize
 typedef struct TestParameters_PtrPtrPtr TestParameters_PtrPtrPtr;
 struct TestParameters_PtrPtrPtr
 {
-    TestLineNumber      test_line_number;
     void                *ptr1;
     void                *ptr2;
     void                *ptr3;
@@ -104,7 +93,6 @@ struct TestParameters_PtrPtrPtr
 typedef struct TestParameters_PtrPtr TestParameters_PtrPtr;
 struct TestParameters_PtrPtr
 {
-    TestLineNumber      test_line_number;
     void                *ptr1;
     void                *ptr2;
 };
@@ -112,7 +100,6 @@ struct TestParameters_PtrPtr
 typedef struct TestParameters_PtrInt TestParameters_PtrInt;
 struct TestParameters_PtrInt
 {
-    TestLineNumber      test_line_number;
     void                *ptr;
     S64                 a;
 };
@@ -120,7 +107,6 @@ struct TestParameters_PtrInt
 typedef struct TestParameters_SizeSize TestParameters_SizeSize;
 struct TestParameters_SizeSize
 {
-    TestLineNumber      test_line_number;
     U64                 size1;
     U64                 size2;
 };
@@ -128,14 +114,12 @@ struct TestParameters_SizeSize
 typedef struct TestParameters_Size TestParameters_Size;
 struct TestParameters_Size
 {
-    TestLineNumber      test_line_number;
     U64                 size;
 };
 
 typedef struct TestParameters_PtrSizeSize TestParameters_PtrSizeSize;
 struct TestParameters_PtrSizeSize
 {
-    TestLineNumber      test_line_number;
     void                *ptr;
     U64                 size1;
     U64                 size2;
@@ -144,7 +128,6 @@ struct TestParameters_PtrSizeSize
 typedef struct TestParameters_PtrSizeSizePtr TestParameters_PtrSizeSizePtr;
 struct TestParameters_PtrSizeSizePtr
 {
-    TestLineNumber      test_line_number;
     void                *ptr1;
     U64                 size1;
     U64                 size2;
@@ -154,7 +137,6 @@ struct TestParameters_PtrSizeSizePtr
 typedef struct TestParameters_CharPtr TestParameters_CharPtr;
 struct TestParameters_CharPtr
 {
-    TestLineNumber      test_line_number;
     char                c;
     void                *ptr;
 };
@@ -162,20 +144,12 @@ struct TestParameters_CharPtr
 typedef struct TestParameters_Char TestParameters_Char;
 struct TestParameters_Char
 {
-    TestLineNumber      test_line_number;
     char                c;
-};
-
-typedef struct TestParameters_Void TestParameters_Void;
-struct TestParameters_Void
-{
-    TestLineNumber      test_line_number;
 };
 
 typedef union TestParameters TestParameters;
 union TestParameters
 {
-    TestParameters_Void               empty;             // Note: used for - ft_lstdelone
     TestParameters_Int                single_int;        // Note: used for - isalpha
     TestParameters_Char               single_char;       // Note: used for - ft_putchar_fd
     TestParameters_IntPtr             int_ptr;           // Note: used for - itoa
@@ -234,57 +208,70 @@ enum
     TestReportFlag_ErrorTimeout       = (1<<9),
 };
 
-#define TESTER_MAXIMUM_PAYLOAD_STRINGS 16
-
-typedef struct TestReport TestReport;
-struct TestReport
-{
-    TestReportFlags     flags;
-    S64                 error_code;
-
-    // Data recieved from Test Context
-    TestParametersType  function_parameters_type;
-    TestParameters      function_parameters;
-    TestReturnType      function_return_type;
-
-    // Data recieved from Test Payload
-    S64                 leak_count;
-
-    U64                 expected_value;
-    U64                 got_value;
-
-    String8             expected_strings[TESTER_MAXIMUM_PAYLOAD_STRINGS];
-    U64                 expected_strings_count;
-    String8             got_strings[TESTER_MAXIMUM_PAYLOAD_STRINGS];
-    U64                 got_strings_count;
-};
 
 typedef struct TestGroup TestGroup;
-struct TestGroup
-{
-    String8     name;
-    String8     file;
-    TestReport  *failed_test_reports;
-    U64         failed_test_reports_count;
-};
+typedef struct TestReport TestReport;
+typedef struct TestWorkerContext TestWorkerContext;
+typedef struct Tester Tester;
+typedef struct TestPayload TestPayload;
+
+typedef TestPayload (*TestCallbackFunction)(TestParameters);
 
 typedef U8 TesterFlags;
 enum
 {
-    TesterFlag_DisableColors = (1<<0),
-    TesterFlag_NoForkMode    = (1<<1),
+    TesterFlag_NoColors = (1<<0),
 };
 
-typedef struct Tester Tester;
+struct TestReport
+{
+    TestReportFlags     flags;
+    S64                 error_code;
+    TestGroup           *test_group;
+    U32                 test_index;
+    TestPayload         *test_payload;
+};
+
+struct TestWorkerContext
+{
+    TesterFlags flags;
+
+    U32         test_group_start_index;
+    U32         test_group_end_index;
+
+    U32         local_test_groups_tested;
+    U32         local_tests_passed;
+    U32         local_tests_failed;
+    U32         local_tests_leaked;
+    U32         local_tests_crashed;
+    U32         local_tests_timedout;
+    U32         local_tests_skipped;
+
+    String8     local_test_groups_summary;
+    String8     local_test_groups_report;
+};
+
+struct TestGroup
+{
+    TestParameters       tests[TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT];
+    U32                  test_count;
+    String8              name;
+    String8              file;
+    TestReturnType       function_return_type;
+    TestParametersType   function_parameters_type;
+    void                 *libft_function;
+    TestCallbackFunction callback;
+};
+
+
+
 struct Tester
 {
     Arena       *permanent_arena;
-    Arena       *testing_arena;
 
-    TestGroup   failed_groups[TESTER_MAXIMUM_LIBFT_FUNCTION_COUNT];
-    U64         failed_groups_count;
-    U64         total_groups_tested;
+    String8     report;
 
+    U32         total_test_groups_tested;
     U64         total_tests_passed;
     U64         total_tests_failed;
     U64         total_tests_leaked;
@@ -294,6 +281,7 @@ struct Tester
 
     char        *output_filename;
     int         dev_null_fd;
+
     TesterFlags flags;
 };
 
@@ -321,6 +309,7 @@ global String8 global_test_report_error_message_table[] =
     [TestReportFlag_ErrorExitNonZero] = String8Literal("[Error] Child process exited with non-zero value:"),
     [TestReportFlag_ErrorTimeout]     = String8Literal("[Error] Child process timed-out after 1 second."),
 };
+global int global_dev_null_fd = -1;
 
 // Tester Functions
 internal_function String8    tester_get_version(void);

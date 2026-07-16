@@ -17,19 +17,10 @@ Tester initialize_tester(void)
     Tester tester = {0};
 
     tester.permanent_arena = arena_create();
-    tester.testing_arena   = arena_create();
     tester.flags           = TESTER_DEFAULT_FLAGS;
     tester.output_filename = TESTER_DEFAULT_OUTPUT_FILENAME;
 
-    int dev_null_fd = open("/dev/null", O_WRONLY);
-    if(dev_null_fd != -1)
-    {
-        tester.dev_null_fd = dev_null_fd;
-    }
-    else
-    {
-        Print("Failed to open '/dev/null' file.\n");
-    }
+    global_dev_null_fd = open("/dev/null", O_WRONLY);
 
     return(tester);
 }
@@ -37,52 +28,62 @@ Tester initialize_tester(void)
 internal_function
 void tester_run(Tester *tester)
 {
-    Print("\n--- Testing for Libft Subject Version %S ---\n", tester_get_supported_libft_subject_version());
-    Print("\n--- Part 1 - Libc Functions ---\n");
-    test_ft_isalpha(tester);
-    test_ft_isdigit(tester);
-    test_ft_isalnum(tester);
-    test_ft_isascii(tester);
-    test_ft_isprint(tester);
-    test_ft_strlen(tester);
-    test_ft_memset(tester);
-    test_ft_bzero(tester);
-    test_ft_memcpy(tester);
-    test_ft_memmove(tester);
-    test_ft_strlcpy(tester);
-    test_ft_strlcat(tester);
-    test_ft_toupper(tester);
-    test_ft_tolower(tester);
-    test_ft_strchr(tester);
-    test_ft_strncmp(tester);
-    test_ft_memchr(tester);
-    test_ft_memcmp(tester);
-    test_ft_strnstr(tester);
-    test_ft_atoi(tester);
-    test_ft_calloc(tester);
-    test_ft_strdup(tester);
+    U64 summary_size_for_test_group      = (tester->flags & TesterFlag_NoColors) ? 250 : 500; // Need to calculate this
+    U64 summary_size_for_all_test_groups = TESTER_MAXIMUM_TEST_GROUP_COUNT * summary_size_for_test_group;
+    U8 *shared_test_group_summary_start  = push_array(tester->permanent_arena, U8, summary_size_for_all_test_groups);
 
-    Print("\n--- Part 2 - Additional Functions ---\n");
-    test_ft_substr(tester);
-    test_ft_strjoin(tester);
-    test_ft_strtrim(tester);
-    test_ft_split(tester);
-    test_ft_itoa(tester);
-    test_ft_strmapi(tester);
-    test_ft_striteri(tester);
-    test_ft_putchar_fd(tester);
-    test_ft_putstr_fd(tester);
-    test_ft_putendl_fd(tester);
-    test_ft_putnbr_fd(tester);
+    U64 report_size_for_test            = 500; // these should be defined macros of global read_only variables
+    U64 report_size_for_test_group      = TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT  * report_size_for_test;
+    U64 report_size_for_all_test_groups = TESTER_MAXIMUM_TEST_GROUP_COUNT * report_size_for_test_group;
+    U8 * shared_test_group_report_start = push_array(tester->permanent_arena, U8, report_size_for_all_test_groups);
 
-    Print("\n--- Part 3 - Linked List Functions ---\n");
-    test_ft_lstnew(tester);
-    test_ft_lstadd_front(tester);
-    test_ft_lstsize(tester);
-    test_ft_lstlast(tester);
-    test_ft_lstadd_back(tester);
-    test_ft_lstdelone(tester);
-    test_ft_lstclear(tester);
-    test_ft_lstiter(tester);
-    test_ft_lstmap(tester);
+    S64 core_count   = sysconf(_SC_NPROCESSORS_ONLN);
+    U64 thread_count = MaximumBetween(4, core_count);
+
+    pthread_t *threads         = push_array(tester->permanent_arena, pthread_t        , thread_count);
+    TestWorkerContext *workers = push_array(tester->permanent_arena, TestWorkerContext, thread_count);
+
+    U32 test_group_count = TESTER_MAXIMUM_TEST_GROUP_COUNT;
+    U64 chunk_size       = test_group_count / thread_count;
+    U64 remainder        = test_group_count % thread_count;
+
+    U64 current_test_group_index = 0;
+    for(U64 thread_index = 0; thread_index < thread_count; thread_index += 1)
+    {
+        workers[thread_index].test_group_start_index = current_test_group_index;
+        U64 test_groups_for_this_thread = chunk_size + (thread_index < remainder ? 1 : 0); // why 1:0 and not 3:0 or any other x:0?
+        workers[thread_index].test_group_end_index = current_test_group_index + test_groups_for_this_thread;
+
+        workers[thread_index].local_test_groups_summary.str = shared_test_group_summary_start + (summary_size_for_test_group * current_test_group_index);
+        workers[thread_index].local_test_groups_report.str  = shared_test_group_report_start  + (report_size_for_test_group  * current_test_group_index);
+
+        current_test_group_index += test_groups_for_this_thread;
+
+        pthread_create(&threads[thread_index], 0, worker_thread_routine, &workers[thread_index]);
+    }
+
+    U8  *test_groups_report_buffer = push_array(tester->permanent_arena, U8, report_size_for_all_test_groups);
+    U64  test_groups_report_buffer_offset = 0;
+
+    for(U64 thread_index = 0; thread_index < thread_count; thread_index += 1)
+    {
+        pthread_join(threads[thread_index], 0);
+
+        tester->total_test_groups_tested += workers[thread_index].local_test_groups_tested;
+        tester->total_tests_passed       += workers[thread_index].local_tests_passed;
+        tester->total_tests_failed       += workers[thread_index].local_tests_failed;
+        tester->total_tests_leaked       += workers[thread_index].local_tests_leaked;
+        tester->total_tests_crashed      += workers[thread_index].local_tests_crashed;
+        tester->total_tests_timedout     += workers[thread_index].local_tests_timedout;
+        tester->total_tests_skipped      += workers[thread_index].local_tests_skipped;
+
+        MemoryCopyString8(test_groups_report_buffer + test_groups_report_buffer_offset, workers[thread_index].local_test_groups_report);
+        test_groups_report_buffer_offset += workers[thread_index].local_test_groups_report.size;
+        Assert(workers[thread_index].local_test_groups_report.size < (report_size_for_test_group * workers[thread_index].local_test_groups_tested));
+
+        write(STDOUT_FILENO, workers[thread_index].local_test_groups_summary.str, workers[thread_index].local_test_groups_summary.size);
+    }
+
+    tester->report.str  = test_groups_report_buffer;
+    tester->report.size = test_groups_report_buffer_offset;
 }

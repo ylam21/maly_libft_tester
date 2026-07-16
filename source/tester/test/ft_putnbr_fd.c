@@ -11,7 +11,7 @@ TestPayload callback_for_putnbr_fd(TestParameters test_parameters)
     payload.expected_strings_sizes[0]    = expected_length + 1;
     payload.expected_strings_sizes_count = 1;
 
-    global_allocation_count = 0;
+    thread_static_allocation_count = 0;
 
     int pipe_fd[2];
     if(pipe(pipe_fd) != -1)
@@ -43,51 +43,26 @@ TestPayload callback_for_putnbr_fd(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count = global_allocation_count;
+    payload.leak_count = thread_static_allocation_count;
 
     return(payload);
 }
 
-internal_function
-void test_ft_putnbr_fd(Tester *tester)
+read_only global TestGroup test_group_ft_putnbr_fd =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        { .int_ptr = {__LINE__, 0,           "0"} },
-        { .int_ptr = {__LINE__, 42,          "42"} },
-        { .int_ptr = {__LINE__, -42,         "-42"} },
-        { .int_ptr = {__LINE__, 2147483647,  "2147483647"} },
-        { .int_ptr = {__LINE__, -2147483648, "-2147483648"} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_putnbr_fd"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Void,
-        .function_parameters_type = TestParametersType_Int,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_putnbr_fd,
-        .callback       = (TestCallbackFunction)callback_for_putnbr_fd,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .int_ptr = {0,           "0"} },
+        [1] = { .int_ptr = {42,          "42"} },
+        [2] = { .int_ptr = {-42,         "-42"} },
+        [3] = { .int_ptr = {2147483647,  "2147483647"} },
+        [4] = { .int_ptr = {-2147483648, "-2147483648"} },
+    },
+    .test_count               = 5,
+    .name                     = String8Literal("ft_putnbr_fd"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Void,
+    .function_parameters_type = TestParametersType_Int,
+    .libft_function           = (void *)ft_putnbr_fd,
+    .callback                 = (TestCallbackFunction)callback_for_putnbr_fd,
+};

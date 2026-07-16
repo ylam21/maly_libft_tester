@@ -18,8 +18,8 @@ TestPayload callback_for_strdup(TestParameters test_parameters)
         free(expected_return);
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char *got_return = ft_strdup((const char *)parameters.ptr);
@@ -45,73 +45,37 @@ TestPayload callback_for_strdup(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_strdup(Tester *tester)
+read_only global TestGroup test_group_ft_strdup =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Empty and Single Characters (Tests minimal malloc boundaries)
-        { .ptr = {__LINE__, ""} },
-        { .ptr = {__LINE__, "a"} },
-        { .ptr = {__LINE__, "\n"} },
-
-        // 2. Standard strings
-        { .ptr = {__LINE__, "Hello, World!"} },
-        { .ptr = {__LINE__, "42 Prague"} },
-        { .ptr = {__LINE__, "0123456789"} },
-
-        // 3. Embedded nulls (strdup MUST stop copying at the first \0)
-        { .ptr = {__LINE__, "Hidden\0Secret"} },
-        { .ptr = {__LINE__, "\0StartNull"} },
-
-        // 4. Escape sequences and whitespace
-        { .ptr = {__LINE__, " \t\n\v\f\r "} },
-        { .ptr = {__LINE__, "\\\\Double Backslash\\\\"} },
-        { .ptr = {__LINE__, "\033[31mRed Alert\033[0m"} },
-
-        // 5. Extended ASCII / UTF-8 bytes
-        { .ptr = {__LINE__, "©®™"} },
-        { .ptr = {__LINE__, "\xff\xaa\x01\x02"} },
-
-        // 6. Long string (Tests larger heap allocations)
-        { .ptr = {__LINE__, "This is a significantly longer string designed to test if the student's malloc logic correctly handles sizes beyond small, single-word buffers. It needs to be long enough to expose potential off-by-one errors when iterating."} }
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_strdup"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_Ptr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_strdup,
-        .callback       = (TestCallbackFunction)callback_for_strdup,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr = {""} },
+        [1]  = { .ptr = {"a"} },
+        [2]  = { .ptr = {"\n"} },
+        [3]  = { .ptr = {"Hello, World!"} },
+        [4]  = { .ptr = {"42 Prague"} },
+        [5]  = { .ptr = {"0123456789"} },
+        [6]  = { .ptr = {"Hidden\0Secret"} },
+        [7]  = { .ptr = {"\0StartNull"} },
+        [8]  = { .ptr = {" \t\n\v\f\r "} },
+        [9]  = { .ptr = {"\\\\Double Backslash\\\\"} },
+        [10] = { .ptr = {"\033[31mRed Alert\033[0m"} },
+        [11] = { .ptr = {"©®™"} },
+        [12] = { .ptr = {"\xff\xaa\x01\x02"} },
+        [13] = { .ptr = {"This is a significantly longer string designed to test if the student's malloc logic correctly handles sizes beyond small, single-word buffers. It needs to be long enough to expose potential off-by-one errors when iterating."} }
+    },
+    .test_count               = 14,
+    .name                     = String8Literal("ft_strdup"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_Ptr,
+    .libft_function           = (void *)ft_strdup,
+    .callback                 = (TestCallbackFunction)callback_for_strdup,
+};

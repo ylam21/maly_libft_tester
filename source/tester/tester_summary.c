@@ -7,14 +7,14 @@ void print_tester_summary(Tester *tester, F64 time_taken)
     U64 total_tests_count = tester->total_tests_passed + tester->total_tests_failed;
 
     summary.size += push_string8_format(scratch.arena, String8Literal("\n--- Summary ---\n")).size;
-    summary.size += push_string8_format(scratch.arena, String8Literal("%-15S %u / %u functions\n"), String8Literal("Tested"), tester->total_groups_tested, TESTER_MAXIMUM_LIBFT_FUNCTION_COUNT).size;
+    summary.size += push_string8_format(scratch.arena, String8Literal("%-15S %u / %u functions\n"), String8Literal("Tested"), tester->total_test_groups_tested, TESTER_MAXIMUM_TEST_GROUP_COUNT).size;
     summary.size += push_string8_format(scratch.arena, String8Literal("%-15S %u\n"), String8Literal("Total Tests"), total_tests_count).size;
 
     String8 red_color;
     String8 green_color;
     String8 yellow_color;
     String8 reset;
-    if(tester->flags & TesterFlag_DisableColors)
+    if(tester->flags & TesterFlag_NoColors)
     {
         red_color    = String8Literal("");
         green_color  = String8Literal("");
@@ -59,25 +59,24 @@ void print_tester_summary(Tester *tester, F64 time_taken)
     }
     summary.size += push_string8_format(scratch.arena, String8Literal("\n")).size;
 
-    if(tester->failed_groups_count > 0)
+    if(tester->report.size != 0)
     {
         char *filename = tester->output_filename;
         int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0777);
         if(fd != -1)
         {
-            U32 write_was_successful = build_debug_information_from_tester_and_write_to_fd(fd, tester);
-            if(write_was_successful)
+            if(write(fd, tester->report.str, tester->report.size) != -1)
             {
                 summary.size += push_string8_format(scratch.arena, String8Literal("See '%s' for more debug information.\n"), filename).size;
             }
             else
             {
-                summary.size += push_string8_format(scratch.arena, String8Literal("[Error] Failed to write to %s file.\n"), filename).size;
+                summary.size += push_string8_format(scratch.arena, String8Literal("[Error] Failed to write debug information to %s file.\n"), filename).size;
             }
         }
         else
         {
-            summary.size += push_string8_format(scratch.arena, String8Literal("[Error] Failed to open %s file.\n"), filename).size;
+            summary.size += push_string8_format(scratch.arena, String8Literal("[Error] Failed to open %s file. Cannot write debug information.\n"), filename).size;
         }
     }
     else

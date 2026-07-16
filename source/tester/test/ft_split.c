@@ -20,8 +20,8 @@ TestPayload callback_for_split(TestParameters test_parameters)
         }
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char **got_return = ft_split((const char *)parameters.ptr1, parameters.c);
@@ -81,75 +81,38 @@ TestPayload callback_for_split(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_split(Tester *tester)
+read_only global TestGroup test_group_ft_split =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Basic Normal Splits
-        { .ptr_char_ptr_size = {__LINE__, "Hello World",              ' ',  (char *[]){"Hello", "World"},                2} },
-        { .ptr_char_ptr_size = {__LINE__, "lorem ipsum dolor sit",    ' ',  (char *[]){"lorem", "ipsum", "dolor", "sit"},4} },
-
-        // 2. Delimiter clustering (Start, Middle, End)
-        { .ptr_char_ptr_size = {__LINE__, "  Hello  World  ",         ' ',  (char *[]){"Hello", "World"},                2} },
-        { .ptr_char_ptr_size = {__LINE__, ",,,,,a,,,,,,b,,,,,",       ',',  (char *[]){"a", "b"},                        2} },
-        { .ptr_char_ptr_size = {__LINE__, "---Empty---Edges---",      '-',  (char *[]){"Empty", "Edges"},                2} },
-        { .ptr_char_ptr_size = {__LINE__, "split|||||this|||||string",'|',  (char *[]){"split", "this", "string"},       3} },
-
-        // 3. No delimiters found
-        { .ptr_char_ptr_size = {__LINE__, "Hello World",              'X',  (char *[]){"Hello World"},                   1} },
-        { .ptr_char_ptr_size = {__LINE__, "a",                        'b',  (char *[]){"a"},                             1} },
-
-        // 4. Edge Cases: Empty strings and strings of ONLY delimiters (Size MUST be 0)
-        { .ptr_char_ptr_size = {__LINE__, "",                         ' ',  (char *[]){0},                               0} },
-        { .ptr_char_ptr_size = {__LINE__, "     ",                    ' ',  (char *[]){0},                               0} },
-        { .ptr_char_ptr_size = {__LINE__, "||||||",                   '|',  (char *[]){0},                               0} },
-        { .ptr_char_ptr_size = {__LINE__, "a",                        'a',  (char *[]){0},                               0} },
-
-        // 5. Splitting by the Null Terminator
-        // Since \0 is the end of the string, it should return the whole string as one word
-        { .ptr_char_ptr_size = {__LINE__, "This is a string",         '\0', (char *[]){"This is a string"},              1} },
-        { .ptr_char_ptr_size = {__LINE__, "",                         '\0', (char *[]){0},                               0} },
-
-        // 6. Non-standard ASCII delimiters
-        { .ptr_char_ptr_size = {__LINE__, "lorem\xffipsum\xff" "dolor",  '\xff',(char *[]){"lorem", "ipsum", "dolor"},   3} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_split"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_PtrChar,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_split,
-        .callback       = (TestCallbackFunction)callback_for_split,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr_char_ptr_size = {"Hello World",              ' ',  (char *[]){"Hello", "World"},                2} },
+        [1]  = { .ptr_char_ptr_size = {"lorem ipsum dolor sit",    ' ',  (char *[]){"lorem", "ipsum", "dolor", "sit"},4} },
+        [2]  = { .ptr_char_ptr_size = {"  Hello  World  ",         ' ',  (char *[]){"Hello", "World"},                2} },
+        [3]  = { .ptr_char_ptr_size = {",,,,,a,,,,,,b,,,,,",       ',',  (char *[]){"a", "b"},                        2} },
+        [4]  = { .ptr_char_ptr_size = {"---Empty---Edges---",      '-',  (char *[]){"Empty", "Edges"},                2} },
+        [5]  = { .ptr_char_ptr_size = {"split|||||this|||||string",'|',  (char *[]){"split", "this", "string"},       3} },
+        [6]  = { .ptr_char_ptr_size = {"Hello World",              'X',  (char *[]){"Hello World"},                   1} },
+        [7]  = { .ptr_char_ptr_size = {"a",                        'b',  (char *[]){"a"},                             1} },
+        [8]  = { .ptr_char_ptr_size = {"",                         ' ',  (char *[]){0},                               0} },
+        [9]  = { .ptr_char_ptr_size = {"     ",                    ' ',  (char *[]){0},                               0} },
+        [10] = { .ptr_char_ptr_size = {"||||||",                   '|',  (char *[]){0},                               0} },
+        [11] = { .ptr_char_ptr_size = {"a",                        'a',  (char *[]){0},                               0} },
+        [12] = { .ptr_char_ptr_size = {"This is a string",         '\0', (char *[]){"This is a string"},              1} },
+        [13] = { .ptr_char_ptr_size = {"",                         '\0', (char *[]){0},                               0} },
+        [14] = { .ptr_char_ptr_size = {"lorem\xffipsum\xff" "dolor",  '\xff',(char *[]){"lorem", "ipsum", "dolor"},   3} },
+    },
+    .test_count               = 15,
+    .name                     = String8Literal("ft_split"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_PtrChar,
+    .libft_function           = (void *)ft_split,
+    .callback                 = (TestCallbackFunction)callback_for_split,
+};

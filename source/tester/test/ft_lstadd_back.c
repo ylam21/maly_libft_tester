@@ -31,8 +31,8 @@ TestPayload callback_for_lstadd_back(TestParameters test_parameters)
     payload.expected_strings_sizes[0]    = expected_length;
     payload.expected_strings_sizes_count = 1;
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function.
     ft_lstadd_back((t_list **)&head, (t_list *)new_node);
@@ -94,58 +94,27 @@ TestPayload callback_for_lstadd_back(TestParameters test_parameters)
         free(new_node);
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = 0;
     payload.got_value      = 0;
 
     return(payload);
 }
 
-internal_function
-void test_ft_lstadd_back(Tester *tester)
+read_only global TestGroup test_group_ft_lstadd_back =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. The Empty List Trap
-        // Passes an empty list. Head must safely become new_node.
-        { .size = {__LINE__, 0} },
-
-        // 2. Standard Append Cases
-        { .size = {__LINE__, 1} }, // Appending to a 1-node list
-        { .size = {__LINE__, 2} },
-
-        // 3. Stress Test
-        { .size = {__LINE__, 1} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_lstadd_back"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-
-    TestContext test_context =
-    {
-        .test_group               = test_group,
-
-        .function_return_type     = TestReturnType_Void,
-        .function_parameters_type = TestParametersType_Size,
-
-        .tests                    = tests,
-        .test_count               = test_count,
-
-        .libft_function           = (void *)ft_lstadd_back,
-        .callback                 = (TestCallbackFunction)callback_for_lstadd_back,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .size = {0} },
+        [1] = { .size = {1} }, // Appending to a 1-node list
+        [2] = { .size = {2} },
+        [3] = { .size = {3} },
+    },
+    .test_count               = 4,
+    .name                     = String8Literal("ft_lstadd_back"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Void,
+    .function_parameters_type = TestParametersType_Size,
+    .libft_function           = (void *)ft_lstadd_back,
+    .callback                 = (TestCallbackFunction)callback_for_lstadd_back,
+};

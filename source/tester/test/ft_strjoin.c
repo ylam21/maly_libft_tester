@@ -15,8 +15,8 @@ TestPayload callback_for_strjoin(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char *got_return = ft_strjoin((const char *)parameters.ptr1, (const char *)parameters.ptr2);
@@ -42,73 +42,37 @@ TestPayload callback_for_strjoin(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_strjoin(Tester *tester)
+read_only global TestGroup test_group_ft_strjoin =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Basic Joins
-        { .ptr_ptr_ptr = {__LINE__, "Hello ", "World!",    "Hello World!"} },
-        { .ptr_ptr_ptr = {__LINE__, "42",     "Prague",    "42Prague"} },
-        { .ptr_ptr_ptr = {__LINE__, "Join",   "Me",        "JoinMe"} },
-
-        // 2. Empty String Combinations (CRITICAL: Catches bad malloc bounds)
-        { .ptr_ptr_ptr = {__LINE__, "",       "",          ""} },
-        { .ptr_ptr_ptr = {__LINE__, "Left",   "",          "Left"} },
-        { .ptr_ptr_ptr = {__LINE__, "",       "Right",     "Right"} },
-
-        // 3. Single Characters
-        { .ptr_ptr_ptr = {__LINE__, "A",      "B",         "AB"} },
-        { .ptr_ptr_ptr = {__LINE__, " ",      " ",         "  "} },
-
-        // 4. Whitespaces & Escapes
-        { .ptr_ptr_ptr = {__LINE__, "\n\t",   " \v\r",     "\n\t \v\r"} },
-        { .ptr_ptr_ptr = {__LINE__, "   ",    "   ",       "      "} },
-
-        // 5. Numbers and Symbols
-        { .ptr_ptr_ptr = {__LINE__, "123",    "456",       "123456"} },
-        { .ptr_ptr_ptr = {__LINE__, "!@#",    "$%^",       "!@#$%^"} },
-
-        // 6. Long strings (Stress tests larger mallocs and copy iterations)
-        { .ptr_ptr_ptr = {__LINE__, "This is a very long string designed to test ", "if they allocate enough memory.", "This is a very long string designed to test if they allocate enough memory."} },
-        { .ptr_ptr_ptr = {__LINE__, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_strjoin"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_PtrPtr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_strjoin,
-        .callback       = (TestCallbackFunction)callback_for_strjoin,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr_ptr_ptr = {"Hello ", "World!",    "Hello World!"} },
+        [1]  = { .ptr_ptr_ptr = {"42",     "Prague",    "42Prague"} },
+        [2]  = { .ptr_ptr_ptr = {"Join",   "Me",        "JoinMe"} },
+        [3]  = { .ptr_ptr_ptr = {"",       "",          ""} },
+        [4]  = { .ptr_ptr_ptr = {"Left",   "",          "Left"} },
+        [5]  = { .ptr_ptr_ptr = {"",       "Right",     "Right"} },
+        [6]  = { .ptr_ptr_ptr = {"A",      "B",         "AB"} },
+        [7]  = { .ptr_ptr_ptr = {" ",      " ",         "  "} },
+        [8]  = { .ptr_ptr_ptr = {"\n\t",   " \v\r",     "\n\t \v\r"} },
+        [9]  = { .ptr_ptr_ptr = {"   ",    "   ",       "      "} },
+        [10] = { .ptr_ptr_ptr = {"123",    "456",       "123456"} },
+        [11] = { .ptr_ptr_ptr = {"!@#",    "$%^",       "!@#$%^"} },
+        [12] = { .ptr_ptr_ptr = {"This is a very long string designed to test ", "if they allocate enough memory.", "This is a very long string designed to test if they allocate enough memory."} },
+        [13] = { .ptr_ptr_ptr = {"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"} },
+    },
+    .test_count               = 14,
+    .name                     = String8Literal("ft_strjoin"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_PtrPtr,
+    .libft_function           = (void *)ft_strjoin,
+    .callback                 = (TestCallbackFunction)callback_for_strjoin,
+};

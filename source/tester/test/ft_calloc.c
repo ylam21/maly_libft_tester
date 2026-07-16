@@ -17,8 +17,8 @@ TestPayload callback_for_calloc(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function.
     void *got_return = ft_calloc((size_t)parameters.size1, (size_t)parameters.size2);
@@ -43,7 +43,7 @@ TestPayload callback_for_calloc(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
@@ -52,68 +52,31 @@ TestPayload callback_for_calloc(TestParameters test_parameters)
     return(payload);
 }
 
-internal_function
-void test_ft_calloc(Tester *tester)
+read_only global TestGroup test_group_ft_calloc =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Standard allocations (Checks that memory is properly zeroed)
-        { .size_size = {__LINE__, 1,  50} },
-        { .size_size = {__LINE__, 16, 26} },
-        { .size_size = {__LINE__, 10, 10} },
-        { .size_size = {__LINE__, 4,  128} },
-
-        // 2. Zero combinations
-        // Behavior varies by OS, but ft_calloc MUST match local libc behavior
-        { .size_size = {__LINE__, 0, 0} },
-        { .size_size = {__LINE__, 8, 0} },
-        { .size_size = {__LINE__, 0, 8} },
-
-        // 3. Size 1 edge cases
-        { .size_size = {__LINE__, 1, 1} },
-        { .size_size = {__LINE__, 1, 0} },
-        { .size_size = {__LINE__, 0, 1} },
-
-        // 4. Large but valid allocations
-        { .size_size = {__LINE__, 100, 10} },
-        { .size_size = {__LINE__, 10, 100} },
-
-        // 5. Overflow Protections (CRITICAL)
-        // students MUST check if (size1 * size2) overflows a size_t.
-        // (size_t)-1 translates to SIZE_MAX (e.g., 18,446,744,073,709,551,615)
-        { .size_size = {__LINE__, (size_t)-1, 2} },
-        { .size_size = {__LINE__, 2, (size_t)-1} },
-        { .size_size = {__LINE__, (size_t)-1, (size_t)-1} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_calloc"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_SizeSize,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_calloc,
-        .callback       = (TestCallbackFunction)callback_for_calloc,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .size_size = {1,  50} },
+        [1]  = { .size_size = {16, 26} },
+        [2]  = { .size_size = {10, 10} },
+        [3]  = { .size_size = {4,  128} },
+        [4]  = { .size_size = {0, 0} },
+        [5]  = { .size_size = {8, 0} },
+        [6]  = { .size_size = {0, 8} },
+        [7]  = { .size_size = {1, 1} },
+        [8]  = { .size_size = {1, 0} },
+        [9]  = { .size_size = {0, 1} },
+        [10] = { .size_size = {100, 10} },
+        [11] = { .size_size = {10, 100} },
+        [12] = { .size_size = {(size_t)-1, 2} },
+        [13] = { .size_size = {2, (size_t)-1} },
+        [14] = { .size_size = {(size_t)-1, (size_t)-1} },
+    },
+    .test_count               = 15,
+    .name                     = String8Literal("ft_calloc"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_SizeSize,
+    .libft_function           = (void *)ft_calloc,
+    .callback                 = (TestCallbackFunction)callback_for_calloc,
+};

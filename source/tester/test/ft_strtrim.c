@@ -15,8 +15,8 @@ TestPayload callback_for_strtrim(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char *got_return = ft_strtrim((const char *)parameters.ptr1, (const char *)parameters.ptr2);
@@ -42,77 +42,39 @@ TestPayload callback_for_strtrim(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_strtrim(Tester *tester)
+read_only global TestGroup test_group_ft_strtrim =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Basic & Multi-character Trims
-        { .ptr_ptr_ptr = {__LINE__, "   Trim Me     ",          " ",         "Trim Me"} },
-        { .ptr_ptr_ptr = {__LINE__, "xxxHello Worldyyy",        "xy",        "Hello World"} },
-        { .ptr_ptr_ptr = {__LINE__, "ababaHello Worldbabab",    "ab",        "Hello World"} },
-
-        // 2. One-Sided Trims
-        { .ptr_ptr_ptr = {__LINE__, "     Left Trim",           " ",         "Left Trim"} },
-        { .ptr_ptr_ptr = {__LINE__, "Right Trim     ",          " ",         "Right Trim"} },
-        { .ptr_ptr_ptr = {__LINE__, "lorem ipsum dolor sit amet", "l",       "orem ipsum dolor sit amet"} },
-        { .ptr_ptr_ptr = {__LINE__, "lorem ipsum dolor sit amet", "t",       "lorem ipsum dolor sit ame"} },
-
-        // 3. Middle Protection (Must NOT trim from the inside)
-        { .ptr_ptr_ptr = {__LINE__, "  Hello  World  ",         " ",         "Hello  World"} },
-        { .ptr_ptr_ptr = {__LINE__, "xxxHelloxxWorldxxx",       "x",         "HelloxxWorld"} },
-
-        // 4. Full Trims (CRITICAL: Pointers crossing over each other)
-        { .ptr_ptr_ptr = {__LINE__, "          ",               " ",         ""} },
-        { .ptr_ptr_ptr = {__LINE__, "ababababab",               "ab",        ""} },
-
-        // 5. No Trimming Needed
-        { .ptr_ptr_ptr = {__LINE__, "Hello World",              "xyz",       "Hello World"} },
-
-        // 6. Empty Strings & Empty Sets (Must return malloc'd copy)
-        { .ptr_ptr_ptr = {__LINE__, "",                         " ",         ""} },
-        { .ptr_ptr_ptr = {__LINE__, "Hello World",              "",          "Hello World"} },
-        { .ptr_ptr_ptr = {__LINE__, "",                         "",          ""} },
-
-        // 7. Standard Whitespace/Control checks
-        { .ptr_ptr_ptr = {__LINE__, " \t\n\v\f\rHello World \t\n\v\f\r", " \t\n\v\f\r", "Hello World"} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_strtrim"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_PtrPtr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_strtrim,
-        .callback       = (TestCallbackFunction)callback_for_strtrim,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .ptr_ptr_ptr = {"   Trim Me     ",          " ",         "Trim Me"} },
+        [1]  = { .ptr_ptr_ptr = {"xxxHello Worldyyy",        "xy",        "Hello World"} },
+        [2]  = { .ptr_ptr_ptr = {"ababaHello Worldbabab",    "ab",        "Hello World"} },
+        [3]  = { .ptr_ptr_ptr = {"     Left Trim",           " ",         "Left Trim"} },
+        [4]  = { .ptr_ptr_ptr = {"Right Trim     ",          " ",         "Right Trim"} },
+        [5]  = { .ptr_ptr_ptr = {"lorem ipsum dolor sit amet", "l",       "orem ipsum dolor sit amet"} },
+        [6]  = { .ptr_ptr_ptr = {"lorem ipsum dolor sit amet", "t",       "lorem ipsum dolor sit ame"} },
+        [7]  = { .ptr_ptr_ptr = {"  Hello  World  ",         " ",         "Hello  World"} },
+        [8]  = { .ptr_ptr_ptr = {"xxxHelloxxWorldxxx",       "x",         "HelloxxWorld"} },
+        [9]  = { .ptr_ptr_ptr = {"          ",               " ",         ""} },
+        [10] = { .ptr_ptr_ptr = {"ababababab",               "ab",        ""} },
+        [11] = { .ptr_ptr_ptr = {"Hello World",              "xyz",       "Hello World"} },
+        [12] = { .ptr_ptr_ptr = {"",                         " ",         ""} },
+        [13] = { .ptr_ptr_ptr = {"Hello World",              "",          "Hello World"} },
+        [14] = { .ptr_ptr_ptr = {"",                         "",          ""} },
+        [15] = { .ptr_ptr_ptr = {" \t\n\v\f\rHello World \t\n\v\f\r", " \t\n\v\f\r", "Hello World"} },
+    },
+    .test_count               = 16,
+    .name                     = String8Literal("ft_strtrim"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_PtrPtr,
+    .libft_function           = (void *)ft_strtrim,
+    .callback                 = (TestCallbackFunction)callback_for_strtrim,
+};

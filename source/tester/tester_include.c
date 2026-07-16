@@ -3,7 +3,6 @@
 #include "tester_summary.c"
 #include "tester_memory_tracking.c"
 #include "tester_debug_information_builder.c"
-#include "test/tester_test.c"
 
 // Part 1 - Libc Functions
 #include "test/ft_isalpha.c"
@@ -52,3 +51,5 @@
 #include "test/ft_lstclear.c"
 #include "test/ft_lstiter.c"
 #include "test/ft_lstmap.c"
+
+#include "test/tester_test.c"

@@ -132,33 +132,8 @@ t_list				*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 #pragma weak ft_lstmap        /* 42 */
 
 // Tester Test Types
-typedef struct TestPayload TestPayload;
-typedef struct TestContext TestContext;
-typedef struct TestReport  TestReport;
 
-typedef TestPayload (*TestCallbackFunction)(TestParameters);
-
-typedef U8 TestContextFlags;
-enum
-{
-    TestContextFlag_TestsWereSkipped = (1<<0),
-};
-
-struct TestContext
-{
-    TestContextFlags     flags;
-    TestGroup            test_group;
-
-    TestReturnType       function_return_type;
-    TestParametersType   function_parameters_type;
-
-    TestParameters       *tests;
-    U64                  test_count;
-
-    void                 *libft_function;
-    TestCallbackFunction callback;
-};
-
+#define TESTER_MAXIMUM_PAYLOAD_STRINGS 16
 #define TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE  512
 
 typedef U8 TestPayloadFlags;
@@ -185,56 +160,10 @@ struct TestPayload
 };
 
 // Tester Main Test Functions
-internal_function void    run_tests(Tester *tester, TestContext *test_context);
-internal_function void    run_and_evaluate_test(Tester *tester, TestContext *test_context, U64 test_index);
-internal_function void    run_and_evaluate_test_no_fork(Tester *tester, TestContext *test_context, U64 test_index);
-internal_function void    fill_test_report_from_payload(Arena *arena, TestReport *test_report, TestPayload *payload);
+internal_function void    *worker_thread_routine(void *params);
+internal_function void    run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group, U64 test_index, U32 *header_was_not_copied);
 internal_function void    print_tests_statistics(U64 test_count, U64 failed_test_count, U32 tests_were_skipped);
 internal_function String8 padding_for_stats(Arena *arena, U32 test_count);
-
-// Test Functions
-internal_function void test_ft_bzero(Tester *tester);
-internal_function void test_ft_memchr(Tester *tester);
-internal_function void test_ft_memcmp(Tester *tester);
-internal_function void test_ft_memmove(Tester *tester);
-internal_function void test_ft_isalpha(Tester *tester);
-internal_function void test_ft_isdigit(Tester *tester);
-internal_function void test_ft_isprint(Tester *tester);
-internal_function void test_ft_isalnum(Tester *tester);
-internal_function void test_ft_isascii(Tester *tester);
-internal_function void test_ft_tolower(Tester *tester);
-internal_function void test_ft_toupper(Tester *tester);
-internal_function void test_ft_atoi(Tester *tester);
-internal_function void test_ft_itoa(Tester *tester);
-internal_function void test_ft_memset(Tester *tester);
-internal_function void test_ft_strlen(Tester *tester);
-internal_function void test_ft_split(Tester *tester);
-internal_function void test_ft_strdup(Tester *tester);
-internal_function void test_ft_strjoin(Tester *tester);
-internal_function void test_ft_strtrim(Tester *tester);
-internal_function void test_ft_memcpy(Tester *tester);
-internal_function void test_ft_strlcpy(Tester *tester);
-internal_function void test_ft_strlcat(Tester *tester);
-internal_function void test_ft_strchr(Tester *tester);
-internal_function void test_ft_strncmp(Tester *tester);
-internal_function void test_ft_strnstr(Tester *tester);
-internal_function void test_ft_calloc(Tester *tester);
-internal_function void test_ft_substr(Tester *tester);
-internal_function void test_ft_strmapi(Tester *tester);
-internal_function void test_ft_striteri(Tester *tester);
-internal_function void test_ft_putchar_fd(Tester *tester);
-internal_function void test_ft_putstr_fd(Tester *tester);
-internal_function void test_ft_putendl_fd(Tester *tester);
-internal_function void test_ft_putnbr_fd(Tester *tester);
-internal_function void test_ft_lstnew(Tester *tester);
-internal_function void test_ft_lstadd_front(Tester *tester);
-internal_function void test_ft_lstsize(Tester *tester);
-internal_function void test_ft_lstlast(Tester *tester);
-internal_function void test_ft_lstadd_back(Tester *tester);
-internal_function void test_ft_lstdelone(Tester *tester);
-internal_function void test_ft_lstclear(Tester *tester);
-internal_function void test_ft_lstiter(Tester *tester);
-internal_function void test_ft_lstmap(Tester *tester);
 
 // Test Callback Functions
 internal_function TestPayload callback_for_bzero(TestParameters test_parameters);

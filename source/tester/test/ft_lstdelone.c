@@ -26,9 +26,9 @@ TestPayload callback_for_lstdelone(TestParameters test_parameters)
 
     // Reset fake_delete_call_count before calling libft function.
     fake_delete_call_count = 0;
-    // Reset global_allocation_count to 1 before calling libft function.
+    // Reset thread_static_allocation_count to 1 before calling libft function.
     // Libft function should free the head
-    global_allocation_count = 1;
+    thread_static_allocation_count = 1;
 
     // Call libft function which should free also this node.
     ft_lstdelone((t_list *)head, (LstdeloneFunction)fake_delete_function);
@@ -38,7 +38,7 @@ TestPayload callback_for_lstdelone(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = 1;
     payload.got_value      = fake_delete_call_count;
 
@@ -47,42 +47,13 @@ TestPayload callback_for_lstdelone(TestParameters test_parameters)
     return(payload);
 }
 
-internal_function
-void test_ft_lstdelone(Tester *tester)
+read_only global TestGroup test_group_ft_lstdelone =
 {
-    TestParameters tests[] =
-    {
-        { .empty = {__LINE__} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-     // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-     TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-     TestGroup test_group =
-     {
-         .name                      = String8Literal("ft_lstdelone"),
-         .file                      = string8_from_cstring(__FILE__),
-         .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-     };
-     TestContext test_context =
-     {
-         .test_group     = test_group,
-
-         .function_return_type     = TestReturnType_Size,
-         .function_parameters_type = TestParametersType_Void,
-
-         .tests          = tests,
-         .test_count     = test_count,
-
-         .libft_function = (void *)ft_lstdelone,
-         .callback       = (TestCallbackFunction)callback_for_lstdelone,
-     };
-
-     run_tests(tester, &test_context);
-
-     if(test_context.flags & TestContextFlag_TestsWereSkipped)
-     {
-         temporary_arena_end(temporary_arena);
-     }
-}
+    .test_count               = 1, // Pass void to the callback
+    .name                     = String8Literal("ft_lstdelone"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Size,
+    .function_parameters_type = TestParametersType_Void,
+    .libft_function           = (void *)ft_lstdelone,
+    .callback                 = (TestCallbackFunction)callback_for_lstdelone,
+};

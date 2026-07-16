@@ -18,10 +18,18 @@
 
 ////////////////////////////////
 // Codebase Keywords
-#define internal_function static
-#define local_persist     static
-#define global            static
-#define thread_static __thread
+#define internal_function  static
+#define local_persist      static
+#define global             static
+#define thread_static      __thread
+
+#if   COMPILER_CLANG && OS_LINUX
+    #define read_only __attribute__((section(".rodata")))
+#elif COMPILER_CLANG && OS_MAC
+    #define read_only __attribute__((section("__TEXT,__const")))
+#else
+    #define read_only
+#endif
 
 ////////////////////////////////
 // Base Data Types
@@ -297,5 +305,6 @@ internal_function S32 safe_cast_s32(S64 x);
 
 ////////////////////////////////
 // Memory Manipulation Functions
+internal_function void memory_set_u32(void *memory, U32 value, U64 byte_size);
 
 #endif // BASE_CORE_H

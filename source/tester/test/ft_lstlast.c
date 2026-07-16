@@ -33,8 +33,8 @@ TestPayload callback_for_lstlast(TestParameters test_parameters)
     payload.expected_strings_sizes[0]    = expected_length;
     payload.expected_strings_sizes_count = 1;
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call the libft function.
     t_list *got_last_node = ft_lstlast((t_list *)head);
@@ -59,60 +59,28 @@ TestPayload callback_for_lstlast(TestParameters test_parameters)
         current = next;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = 0;
     payload.got_value      = 0;
 
     return(payload);
 }
 
-internal_function
-void test_ft_lstlast(Tester *tester)
+read_only global TestGroup test_group_ft_lstlast =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. The Empty List Trap
-        { .size = {__LINE__, 0} },
-
-        // 2. Single Node
-        { .size = {__LINE__, 1} },
-
-        // 3. Standard Cases
-        { .size = {__LINE__, 2} },
-        { .size = {__LINE__, 5} },
-
-        // 4. Stress Test
-        { .size = {__LINE__, 4} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_lstlast"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-
-    TestContext test_context =
-    {
-        .test_group               = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_Size,
-
-        .tests                    = tests,
-        .test_count               = test_count,
-
-        .libft_function           = (void *)ft_lstlast,
-        .callback                 = (TestCallbackFunction)callback_for_lstlast,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .size = {0} },
+        [1] = { .size = {1} },
+        [2] = { .size = {2} },
+        [3] = { .size = {5} },
+        [4] = { .size = {4} },
+    },
+    .test_count               = 5,
+    .name                     = String8Literal("ft_lstlast"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_Size,
+    .libft_function           = (void *)ft_lstlast,
+    .callback                 = (TestCallbackFunction)callback_for_lstlast,
+};

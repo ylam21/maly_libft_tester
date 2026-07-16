@@ -7,17 +7,19 @@
 #define BASE_CONTEXT_CRACKING_H
 
 // Compiler Cracking
-#if defined(__GNUC__) || defined(__GNUG__)
-    #define COMPILER_GCC 1
+#if defined(__clang__)
+    #define COMPILER_CLANG 1
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define COMPILER_GCC   1
 #else
-    #error Compiler not supported. Only GCC is supported.
+    #error Compiler not supported. Only GCC or Clang are supported.
 #endif
 
 // Operating System Cracking
 #if defined(__gnu_linux__) || defined(__linux__)
     #define OS_LINUX 1
 #else
-    #error Operating System not supported. Only Linux is supported.
+    #error Operating System not supported.
 #endif
 
 // Zero out undefined macros

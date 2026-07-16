@@ -13,8 +13,8 @@ TestPayload callback_for_isascii(TestParameters test_parameters)
     //    • 0 if the character does not match
     expected_return = MinimumBetween(expected_return, 1);
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function.
     int got_return = ft_isascii((int)parameters.a);
@@ -24,72 +24,41 @@ TestPayload callback_for_isascii(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_isascii(Tester *tester)
+read_only global TestGroup test_group_ft_isascii =
 {
-    TestParameters tests[] =
+    .tests =
     {
         // Note: isascii argument 'c' must have the value of an unsigned char or EOF. (https://man7.org/linux/man-pages/man3/isspace.3.html)
         //       Do not write any test that does not follow this rule.
         // Note: Unsigned char has the range 0 - 255.
         // Note: isascii strictly checks for 7-bit ASCII range (0 to 127).
-
-        // Extremes & The Core Boundaries (CRITICAL)
-        { .single_int = {__LINE__, EOF} },
-        { .single_int = {__LINE__, 0  } },     // Lowest valid ASCII
-        { .single_int = {__LINE__, 127} },     // Highest valid ASCII
-        { .single_int = {__LINE__, 128} },     // Lowest invalid ASCII (Just outside range)
-        { .single_int = {__LINE__, 255} },     // Max unsigned char (Invalid)
-
-        // Valid Mid-range characters
-        { .single_int = {__LINE__, 'A' } },
-        { .single_int = {__LINE__, 'a' } },
-        { .single_int = {__LINE__, '0' } },
-        { .single_int = {__LINE__, '\n'} },
-        { .single_int = {__LINE__, ' ' } },
-        { .single_int = {__LINE__, 64  } },    // '@'
-
-        // Invalid Extended Range (Simulating extended ASCII/UTF-8 bytes)
-        { .single_int = {__LINE__, 129 } },
-        { .single_int = {__LINE__, 200 } },
-        { .single_int = {__LINE__, 254 } },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_isascii"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Int,
-        .function_parameters_type = TestParametersType_Int,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_isascii,
-        .callback       = (TestCallbackFunction)callback_for_isascii,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .single_int = {EOF} },
+        [1] = { .single_int = {0  } },     // Lowest valid ASCII
+        [2] = { .single_int = {127} },     // Highest valid ASCII
+        [3] = { .single_int = {128} },     // Lowest invalid ASCII (Just outside range)
+        [4] = { .single_int = {255} },     // Max unsigned char (Invalid)
+        [5] = { .single_int = {'A' } },
+        [6] = { .single_int = {'a' } },
+        [7] = { .single_int = {'0' } },
+        [8] = { .single_int = {'\n'} },
+        [9] = { .single_int = {' ' } },
+        [10] = { .single_int = {64  } },    // '@'
+        [11] = { .single_int = {129 } },
+        [12] = { .single_int = {200 } },
+        [13] = { .single_int = {254 } },
+    },
+    .test_count               = 14,
+    .name                     = String8Literal("ft_isascii"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Int,
+    .function_parameters_type = TestParametersType_Int,
+    .libft_function           = (void *)ft_isascii,
+    .callback                 = (TestCallbackFunction)callback_for_isascii,
+};

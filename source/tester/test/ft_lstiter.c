@@ -72,45 +72,21 @@ TestPayload callback_for_lstiter(TestParameters test_parameters)
 
     return(payload);
 }
-internal_function
-void test_ft_lstiter(Tester *tester)
+
+read_only global TestGroup test_group_ft_lstiter =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        { .size = {__LINE__, 0} }, // The NULL trap
-        { .size = {__LINE__, 1} },
-        { .size = {__LINE__, 5} },
-        { .size = {__LINE__, 10} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_lstiter"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Void,
-        .function_parameters_type = TestParametersType_Size,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_lstiter,
-        .callback       = (TestCallbackFunction)callback_for_lstiter,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .size = {0} }, // The NULL trap
+        [1] = { .size = {1} },
+        [2] = { .size = {5} },
+        [3] = { .size = {10} },
+    },
+    .test_count               = 4,
+    .name                     = String8Literal("ft_lstiter"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Void,
+    .function_parameters_type = TestParametersType_Size,
+    .libft_function           = (void *)ft_lstiter,
+    .callback                 = (TestCallbackFunction)callback_for_lstiter,
+};

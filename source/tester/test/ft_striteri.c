@@ -39,8 +39,8 @@ TestPayload callback_for_striteri(TestParameters test_parameters)
     U64 input_size = length_of_cstring((char *)parameters.ptr1) + 1;
     MemoryCopy(mutable_string, parameters.ptr1, input_size);
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     ft_striteri(mutable_string, (StriteriFunction)parameters.ptr2);
@@ -61,65 +61,31 @@ TestPayload callback_for_striteri(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)parameters.ptr3;
     payload.got_value      = (U64)parameters.ptr1;
 
     return(payload);
 }
 
-internal_function
-void test_ft_striteri(Tester *tester)
+read_only global TestGroup test_group_ft_striteri =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Standard iterations (Tests pointer modification)
-        { .ptr_ptr_ptr = {__LINE__, "i want to be uppercase!", make_string_uppercase, "I WANT TO BE UPPERCASE!"} },
-        { .ptr_ptr_ptr = {__LINE__, "Hello",                   replace_with_x,        "XXXXX"} },
-
-        // 2. Index Verification (CRITICAL: Catches students who ignore the index)
-        // '0'+0='0', '0'+1='1', '0'+2='2', etc.
-        { .ptr_ptr_ptr = {__LINE__, "00000",                   add_index_to_char,     "01234"} },
-        // 'a'+0='a', 'b'+1='c', 'c'+2='e', 'd'+3='g', 'e'+4='i'
-        { .ptr_ptr_ptr = {__LINE__, "abcde",                   add_index_to_char,     "acegi"} },
-
-        // 3. Single character bounds
-        { .ptr_ptr_ptr = {__LINE__, "a",                       make_string_uppercase, "A"} },
-        { .ptr_ptr_ptr = {__LINE__, " ",                       replace_with_x,        "X"} },
-
-        // 4. Empty strings (CRITICAL: Must immediately return without doing anything)
-        { .ptr_ptr_ptr = {__LINE__, "",                        make_string_uppercase, ""} },
-        { .ptr_ptr_ptr = {__LINE__, "",                        add_index_to_char,     ""} },
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_striteri"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Void,
-        .function_parameters_type = TestParametersType_PtrPtr,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_striteri,
-        .callback       = (TestCallbackFunction)callback_for_striteri,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0] = { .ptr_ptr_ptr = {"i want to be uppercase!", make_string_uppercase, "I WANT TO BE UPPERCASE!"} },
+        [1] = { .ptr_ptr_ptr = {"Hello",                   replace_with_x,        "XXXXX"} },
+        [2] = { .ptr_ptr_ptr = {"00000",                   add_index_to_char,     "01234"} },
+        [3] = { .ptr_ptr_ptr = {"abcde",                   add_index_to_char,     "acegi"} },
+        [4] = { .ptr_ptr_ptr = {"a",                       make_string_uppercase, "A"} },
+        [5] = { .ptr_ptr_ptr = {" ",                       replace_with_x,        "X"} },
+        [6] = { .ptr_ptr_ptr = {"",                        make_string_uppercase, ""} },
+        [7] = { .ptr_ptr_ptr = {"",                        add_index_to_char,     ""} },
+    },
+    .test_count               = 7,
+    .name                     = String8Literal("ft_striteri"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Void,
+    .function_parameters_type = TestParametersType_PtrPtr,
+    .libft_function           = (void *)ft_striteri,
+    .callback                 = (TestCallbackFunction)callback_for_striteri,
+};

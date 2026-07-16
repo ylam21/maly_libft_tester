@@ -15,8 +15,8 @@ TestPayload callback_for_itoa(TestParameters test_parameters)
         payload.expected_strings_sizes_count = 1;
     }
 
-    // Reset global_allocation_count before calling libft function.
-    global_allocation_count = 0;
+    // Reset thread_static_allocation_count before calling libft function.
+    thread_static_allocation_count = 0;
 
     // Call libft function and save the result.
     char *got_return = ft_itoa((int)parameters.a);
@@ -42,74 +42,40 @@ TestPayload callback_for_itoa(TestParameters test_parameters)
         }
     }
 
-    payload.leak_count     = global_allocation_count;
+    payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;
 
     return(payload);
 }
 
-internal_function
-void test_ft_itoa(Tester *tester)
+read_only global TestGroup test_group_ft_itoa =
 {
-    TestParameters tests[] =
+    .tests =
     {
-        // 1. Zero (Special case in most implementations)
-        { .int_ptr = {__LINE__, 0,           "0"          } },
-
-        // 2. Single Digits
-        { .int_ptr = {__LINE__, 1,           "1"          } },
-        { .int_ptr = {__LINE__, 9,           "9"          } },
-        { .int_ptr = {__LINE__, -1,          "-1"         } },
-        { .int_ptr = {__LINE__, -9,          "-9"         } },
-
-        // 3. Double Digits & Powers of 10 (Catches reversing off-by-one bugs)
-        { .int_ptr = {__LINE__, 10,          "10"         } },
-        { .int_ptr = {__LINE__, -10,         "-10"        } },
-        { .int_ptr = {__LINE__, 100,         "100"        } },
-        { .int_ptr = {__LINE__, -100,        "-100"       } },
-
-        // 4. Standard numbers
-        { .int_ptr = {__LINE__, 42,          "42"         } },
-        { .int_ptr = {__LINE__, -42,         "-42"        } },
-        { .int_ptr = {__LINE__, 9999,        "9999"       } },
-        { .int_ptr = {__LINE__, -9999,       "-9999"      } },
-        { .int_ptr = {__LINE__, 1000000,     "1000000"    } },
-
-        // 5. Integer Limits (CRITICAL)
-        { .int_ptr = {__LINE__, 2147483647,  "2147483647" } }, // INT_MAX
-        { .int_ptr = {__LINE__, -2147483647, "-2147483647"} }, // INT_MIN + 1
-        { .int_ptr = {__LINE__, -2147483648, "-2147483648"} }, // INT_MIN (The ultimate trap)
-    };
-    U64 test_count = CountOfStaticArray(tests);
-
-    // Save the current position in Tester's permanent arena and reset it only if tests were skipped.
-    TemporaryArena temporary_arena = temporary_arena_begin(tester->permanent_arena);
-
-    TestGroup test_group =
-    {
-        .name                      = String8Literal("ft_itoa"),
-        .file                      = string8_from_cstring(__FILE__),
-        .failed_test_reports       = push_array(tester->permanent_arena, TestReport, test_count),
-    };
-    TestContext test_context =
-    {
-        .test_group     = test_group,
-
-        .function_return_type     = TestReturnType_Ptr,
-        .function_parameters_type = TestParametersType_Int,
-
-        .tests          = tests,
-        .test_count     = test_count,
-
-        .libft_function = (void *)ft_itoa,
-        .callback       = (TestCallbackFunction)callback_for_itoa,
-    };
-
-    run_tests(tester, &test_context);
-
-    if(test_context.flags & TestContextFlag_TestsWereSkipped)
-    {
-        temporary_arena_end(temporary_arena);
-    }
-}
+        [0]  = { .int_ptr = {0,           "0"          } },
+        [1]  = { .int_ptr = {1,           "1"          } },
+        [2]  = { .int_ptr = {9,           "9"          } },
+        [3]  = { .int_ptr = {-1,          "-1"         } },
+        [4]  = { .int_ptr = {-9,          "-9"         } },
+        [5]  = { .int_ptr = {10,          "10"         } },
+        [6]  = { .int_ptr = {-10,         "-10"        } },
+        [7]  = { .int_ptr = {100,         "100"        } },
+        [8]  = { .int_ptr = {-100,        "-100"       } },
+        [9]  = { .int_ptr = {42,          "42"         } },
+        [10] = { .int_ptr = {-42,         "-42"        } },
+        [11] = { .int_ptr = {9999,        "9999"       } },
+        [12] = { .int_ptr = {-9999,       "-9999"      } },
+        [13] = { .int_ptr = {1000000,     "1000000"    } },
+        [14] = { .int_ptr = {2147483647,  "2147483647" } }, // INT_MAX
+        [15] = { .int_ptr = {-2147483647, "-2147483647"} }, // INT_MIN + 1
+        [16] = { .int_ptr = {-2147483648, "-2147483648"} }, // INT_MIN (The ultimate trap)
+    },
+    .test_count               = 17,
+    .name                     = String8Literal("ft_itoa"),
+    .file                     = String8Literal(__FILE__),
+    .function_return_type     = TestReturnType_Ptr,
+    .function_parameters_type = TestParametersType_Int,
+    .libft_function           = (void *)ft_itoa,
+    .callback                 = (TestCallbackFunction)callback_for_itoa,
+};

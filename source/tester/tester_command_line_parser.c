@@ -14,10 +14,6 @@ String8 get_tester_help(void)
     String8 result = String8Literal(
         "The Maly Libft Tester - Help\n"
         "The following options may be used when starting the tester from the command line:\n\n"
-        "  --no-fork\n"
-        "    Run the tester with 1 execution process only. The program will crash if any libft\n"
-        "    function crashes. If you experience a crash when running with '--no-fork',\n"
-        "    it is recommended to run the tester again without this option.\n\n"
         "  --output <filename>\n"
         "    Run the tester with provided filename.\n"
         "    If no output file is set from command line the tester proceeds with its default output filename.\n"
@@ -59,11 +55,7 @@ void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument
         }
         else if(string8_match(argument, String8Literal("--no-colors")))
         {
-            tester->flags |= TesterFlag_DisableColors;
-        }
-        else if(string8_match(argument, String8Literal("--no-fork")))
-        {
-            tester->flags |= TesterFlag_NoForkMode;
+            tester->flags |= TesterFlag_NoColors;
         }
         else if(string8_match(argument, String8Literal("--version")))
         {
