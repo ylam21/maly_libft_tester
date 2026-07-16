@@ -284,7 +284,7 @@ struct Tester
 };
 
 // Globals
-read_only global String8 global_tester_version                         = String8Literal("1.1.0");
+read_only global String8 global_tester_version                         = String8Literal("1.1.1");
 read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
 read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
@@ -305,7 +305,7 @@ read_only global String8 global_test_report_error_message_table[] =
     [TestReportFlag_MemoryLeaked]     = String8Literal("[Error] Memory Leak Detected:"),
     [TestReportFlag_ErrorErrnoSet]    = String8Literal("[Error] waitpid() failed and errno was set to:"),
     [TestReportFlag_ErrorExitNonZero] = String8Literal("[Error] Child process exited with non-zero value:"),
-    [TestReportFlag_ErrorTimeout]     = String8Literal("[Error] Child process timed-out after 1 second."),
+    [TestReportFlag_ErrorTimeout]     = String8Literal("[Error] Child process timed-out after"),
 };
 global int global_dev_null_fd = -1;
 

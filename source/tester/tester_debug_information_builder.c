@@ -342,7 +342,9 @@ String8 debug_info_from_payload(DebugInfoBuilder *info)
             {
                 info->worker->local_tests_timedout += 1;
                 *(info->char_to_print) = 'T';
-                result.size += push_string8_format(info->arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout]).size;
+                U64 seconds      = info->worker->timeout.it_value.tv_sec;
+                U64 milliseconds = info->worker->timeout.it_value.tv_usec / Thousand(1);
+                result.size += push_string8_format(info->arena, String8Literal("%S %us and %ums\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout], seconds, milliseconds).size;
             }
             else
             {
