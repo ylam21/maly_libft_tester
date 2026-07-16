@@ -7,8 +7,14 @@
 // are rendered with irregular padding, breaking the visual alignment of the output.
 
 // Tester Default Settings
-#define TESTER_DEFAULT_FLAGS                    0
-#define TESTER_DEFAULT_OUTPUT_FILENAME          "failed_reports.txt"
+#define TESTER_DEFAULT_FLAGS            0
+#define TESTER_DEFAULT_OUTPUT_FILENAME  "failed_reports.txt"
+#define TESTER_DEFAULT_TIMEOUT_MS       100 // milliseconds
+
+#define TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP_NO_COLORS 128         // Note: This is tested safe value. Do not change.
+#define TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP           512         // Note: This is tested safe value. Do not change.
+#define TESTER_DEFAULT_REPORT_SIZE_FOR_TEST                  Thousand(1) // Note: This is tested safe value. Do not change.
+
 #define TESTER_MAXIMUM_TEST_GROUP_COUNT         42 // 42 was counted in source/tester/tester.c
 #define TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT    26 // Currently, max tests written is 26 tests for ft_memmove
 
@@ -192,9 +198,6 @@ enum
     TestParametersType_Char           = (1<<17),
 };
 
-
-
-
 typedef U16 TestReportFlags;
 enum
 {
@@ -210,6 +213,7 @@ enum
     TestReportFlag_ResultsDoNotMatch  = (1<<10),
 };
 
+// Layout of a mask that is used in source/tester/test/tester_test.c
 // 0b 0000 0000 0000 0000
 // 0b 0000 0000 0111 1111  -> mask: 0x007f
 
@@ -229,7 +233,8 @@ enum
 
 struct TestWorkerContext
 {
-    TesterFlags flags;
+    struct itimerval timeout;
+    TesterFlags      flags;
 
     U32         test_group_start_index;
     U32         test_group_end_index;
@@ -272,19 +277,19 @@ struct Tester
     U64         total_tests_timedout;
     U64         total_tests_skipped;
 
-    char        *output_filename;
-    int         dev_null_fd;
-
-    TesterFlags flags;
+    char             *output_filename;
+    int              dev_null_fd;
+    struct itimerval timeout;
+    TesterFlags      flags;
 };
 
 // Globals
-global String8 global_tester_version                         = String8Literal("1.0.3");
-global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
+read_only global String8 global_tester_version                         = String8Literal("1.1.0");
+read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
-global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
-global String8 global_null_text = String8Literal("(null)");
-global String8 global_color_table_for_characters[]  =
+read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
+read_only global String8 global_null_text = String8Literal("(null)");
+read_only global String8 global_color_table_for_characters[]  =
 {
     ['.'] = String8Literal("\033[32m.\033[0m"),
     ['M'] = String8Literal("\033[33mM\033[0m"),
@@ -292,7 +297,7 @@ global String8 global_color_table_for_characters[]  =
     ['T'] = String8Literal("\033[31mT\033[0m"),
     ['F'] = String8Literal("\033[31mF\033[0m"),
 };
-global String8 global_test_report_error_message_table[] =
+read_only global String8 global_test_report_error_message_table[] =
 {
     [TestReportFlag_ErrorPipe]        = String8Literal("[Error] Call to pipe() failed"),
     [TestReportFlag_ErrorPayloadRead] = String8Literal("[Error] Payload Read Failed"),

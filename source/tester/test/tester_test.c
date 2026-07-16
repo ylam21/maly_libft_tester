@@ -1,6 +1,3 @@
-#include <setjmp.h>
-#include <signal.h>
-
 // These are exclusively used by the isolated child processes
 global sigjmp_buf global_jump_buffer;
 global int        global_caught_signal;
@@ -66,6 +63,7 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
     TestPayload payloads[TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT] = {0};
     TestReportFlags flags = 0;
     S32 error_code = 0;
+
     int pipefd[2];
     if(pipe(pipefd) != -1)
     {
@@ -84,8 +82,10 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
             sigaction(SIGSEGV, &sa, 0); // Segmentation Fault
             sigaction(SIGBUS,  &sa, 0); // Bus Error
             sigaction(SIGABRT, &sa, 0); // Double Free / Abort
+            sigaction(SIGALRM, &sa, 0); // Timeout
 
-            TestPayload payloads[TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT] = {0};
+            struct itimerval timeout = test_worker->timeout;
+            struct itimerval cancel_timer = {0};
 
             for(U64 test_index = 0; test_index < test_group->test_count; test_index += 1)
             {
@@ -93,9 +93,11 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
 
                 if(sigsetjmp(global_jump_buffer, 1) == 0)
                 {
-                    alarm(1);
+                    setitimer(ITIMER_REAL, &timeout, 0);
+
                     payloads[test_index] = test_group->callback(test_group->tests[test_index]);
-                    alarm(0);
+
+                    setitimer(ITIMER_REAL, &cancel_timer, 0);
                 }
                 else
                 {
@@ -163,17 +165,13 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
     if(!(flags & 0x007f))
     {
         TemporaryArena scratch = ScratchArenaBegin(0);
-        // Copy the group name
-        String8 name_with_padding = push_string8_format(scratch.arena, String8Literal("%-20S"), test_group->name);
-        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, name_with_padding);
-        test_worker->local_test_groups_summary.size += name_with_padding.size;
 
         U32 local_tests_passed_before = test_worker->local_tests_passed;
 
         U32 header_was_not_copied = 1;
         for(U64 payload_index = 0; payload_index < test_group->test_count; payload_index += 1)
         {
-            U8 char_to_print;
+            U8 char_to_print = 'F';
 
             DebugInfoBuilder info =
             {
@@ -229,6 +227,7 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
     }
     else
     {
+        // TODO: handle this case better.
         (void)error_code;
         Print("Fatal Crash. Exiting Now.\n");
         exit(1);
@@ -249,7 +248,7 @@ String8 padding_for_stats(Arena *arena, U32 test_count)
 internal_function
 void *worker_thread_routine(void *params)
 {
-    initialize_thread_context();
+    initialize_thread_context(); // Since scratch arenas are thread-local specific, we need to call this function for every worker.
     TestWorkerContext *test_worker = (TestWorkerContext *)params;
 
     String8 tester_start_header = {0};
@@ -283,12 +282,17 @@ void *worker_thread_routine(void *params)
         }
 
         TestGroup *test_group = global_test_groups[test_group_index];
+
+        // Copy the group name
+        String8 name_with_padding = push_string8_format(scratch.arena, String8Literal("%-20S"), test_group->name);
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, name_with_padding);
+        test_worker->local_test_groups_summary.size += name_with_padding.size;
+
         if(test_group->libft_function != 0)
         {
             test_worker->local_test_groups_tested += 1;
 
             run_all_tests_for_test_group_and_evaluate(test_worker, test_group);
-
         }
         else
         {

@@ -35,6 +35,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+#include <setjmp.h>
 
 internal_function U64    os_get_timestamp(void);
 internal_function void   os_write_message(String8 message);

@@ -165,7 +165,7 @@ struct TestPayload
 internal_function void    *worker_thread_routine(void *params);
 internal_function void    run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, TestGroup *test_group);
 internal_function String8 padding_for_stats(Arena *arena, U32 test_count);
-internal_function void crash_handler(int signum);
+internal_function void    crash_handler(int signum);
 
 // Test Callback Functions
 internal_function TestPayload callback_for_bzero(TestParameters test_parameters);

@@ -16,9 +16,9 @@
 
 int main(int argument_count, char **arguments)
 {
-    profiler_start();            // Necessary setup for profiling code block.
+    profiler_start();            // Necessary setup for profiling code blocks.
     initialize_os_system_info(); // Necessary setup for creating any new arena.
-    initialize_thread_context(); // Necessary setup for the usage of scratch arenas.
+    initialize_thread_context(); // Necessary setup for the usage of thread local scratch arenas.
 
     ProfilerBlockBegin(tester);
 
