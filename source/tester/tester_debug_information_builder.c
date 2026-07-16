@@ -300,110 +300,83 @@ U64 push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayl
 }
 
 internal_function
-U64 push_general_error_messages_from_test_report(Arena *arena, TestReport *test_report)
+String8 debug_info_from_payload(DebugInfoBuilder *info)
 {
-    U64 size = 0;
-    if(test_report->flags & TestReportFlag_ErrorPipe)
-    {
-        size += push_string8_format(arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorPipe]).size;
-    }
-    if(test_report->flags & TestReportFlag_ErrorPayloadRead)
-    {
-        size += push_string8_format(arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorPayloadRead]).size;
-    }
-    if(test_report->flags & TestReportFlag_ErrorFork)
-    {
-        size += push_string8_format(arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorFork]).size;
-    }
-    if(test_report->flags & TestReportFlag_ErrorTimeout)
-    {
-        size += push_string8_format(arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout]).size;
-    }
-    if(test_report->flags & TestReportFlag_MemoryLeaked)
-    {
-        if(test_report->flags & TestReportFlag_ErrorPayloadRead)
-        {
-            size += push_string8_format(arena, String8Literal("%S Atleast one object was not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], test_report->test_group->name).size;
-        }
-        else
-        {
-            S64 leak_count = test_report->test_payload->leak_count;
-            if(leak_count > 1)
-            {
-                size += push_string8_format(arena, String8Literal("%S %i objects were not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, test_report->test_group->name).size;
-            }
-            else
-            {
-                size += push_string8_format(arena, String8Literal("%S %i object was not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, test_report->test_group->name).size;
-            }
-        }
-    }
-    if(test_report->flags & TestReportFlag_ErrorErrnoSet)
-    {
-        size += push_string8_format(arena, String8Literal("%S %u\n"), global_test_report_error_message_table[TestReportFlag_ErrorErrnoSet], test_report->error_code).size;
-    }
-    if(test_report->flags & TestReportFlag_ErrorExitNonZero)
-    {
-        size += push_string8_format(arena, String8Literal("%S %u\n"), global_test_report_error_message_table[TestReportFlag_ErrorErrnoSet], test_report->error_code).size;
-    }
-    if(test_report->flags & TestReportFlag_ErrorChildCrashed)
-    {
-        if (test_report->error_code == SIGSEGV)
-        {
-            size += push_string8_format(arena, String8Literal("[Error] Crash: Segmentation Fault (Signal 11)\n")).size;
-        }
-        else if (test_report->error_code == SIGABRT)
-        {
-            size += push_string8_format(arena, String8Literal("[Error] Crash: Double Free or Heap Corruption (Signal 6)\n")).size;
-        }
-        else if(test_report->error_code == SIGBUS)
-        {
-            size += push_string8_format(arena, String8Literal("[Error] Crash: Bus Error (Signal 10)\n")).size;
-        }
-        else if(test_report->error_code == SIGALRM)
-        {
-            size += push_string8_format(arena, String8Literal("[Error] Crashed with SIGALRM: Infinite Loop Detected\n")).size;
-        }
-        else
-        {
-            size += push_string8_format(arena, String8Literal("[Error] Child process crashed with signal: %u\n"), test_report->error_code).size;
-        }
-    }
-    return(size);
-}
+    String8 result = { .str  = push_array(info->arena, U8, 0) };
 
-
-internal_function
-String8 debug_info_from_test_report(Arena *arena, TestReport *test_report, U32 *header_was_not_copied)
-{
-    String8 result = { .str  = push_array(arena, U8, 0) };
-
-    if(*header_was_not_copied)
+    if(info->payload->flags & TestPayloadFlag_TestPassed)
     {
-        result.size += push_string8_format(arena, String8Literal("----------------------------------------\n")).size;
-        result.size += push_string8_format(arena, String8Literal("(Start of debug info for failed test group %S)\n"), test_report->test_group->name).size;
-        result.size += push_string8_format(arena, String8Literal("See '%S' file for tests definitions for this group.\n"), test_report->test_group->file).size;
-        result.size += push_string8_format(arena, String8Literal("See test index attached to know where to seek for more information about the test.\n\n")).size;
-
-        *header_was_not_copied = 0;
-    }
-
-    result.size += push_string8_format(arena, String8Literal(">>>(Start of test report)>>>\n")).size;
-    result.size += push_function_parameters_from_test_group(arena, test_report->test_group, test_report->test_index);
-    if(test_report->flags & TestReportFlag_ResultsDoNotMatch)
-    {
-        result.size += push_string8_format(arena, String8Literal("Note: Function did >>NOT<< return correct results.\n\n")).size;
-        if(!(test_report->flags & TestReportFlag_ErrorPayloadRead))
-        {
-            result.size += push_results_from_test_payload(arena, test_report->test_group, test_report->test_payload);
-        }
+        info->worker->local_tests_passed += 1;
+        *(info->char_to_print) = '.';
     }
     else
     {
-        result.size += push_string8_format(arena, String8Literal("Note: Function did return correct results.\n\n")).size;
-    }
-    result.size += push_general_error_messages_from_test_report(arena, test_report);
-    result.size += push_string8_format(arena, String8Literal("<<<(End of test report)<<<\n\n")).size;
+        info->worker->local_tests_failed += 1;
+        *(info->char_to_print) = 'F';
 
+        if(*(info->header_was_not_copied))
+        {
+            result.size += push_string8_format(info->arena, String8Literal("----------------------------------------\n")).size;
+            result.size += push_string8_format(info->arena, String8Literal("(Start of debug info for failed test group %S)\n"), info->group->name).size;
+            result.size += push_string8_format(info->arena, String8Literal("See '%S' file for tests definitions for this group.\n"), info->group->file).size;
+            result.size += push_string8_format(info->arena, String8Literal("See test index attached to know where to seek for more information about the test.\n\n")).size;
+            *(info->header_was_not_copied) = 0;
+        }
+
+        result.size += push_string8_format(info->arena, String8Literal(">>>(Start of test report)>>>\n")).size;
+        result.size += push_function_parameters_from_test_group(info->arena, info->group, info->test_index);
+
+        if(!(info->payload->flags & TestPayloadFlag_ResultsMatch))
+        {
+            result.size += push_string8_format(info->arena, String8Literal("Note: Function did >>NOT<< return correct results.\n\n")).size;
+            result.size += push_results_from_test_payload(info->arena, info->group, info->payload);
+        }
+        else
+        {
+            result.size += push_string8_format(info->arena, String8Literal("Note: Function did return correct results.\n\n")).size;
+        }
+
+        if(info->payload->crash_signal != 0)
+        {
+            if(info->payload->crash_signal == SIGALRM)
+            {
+                info->worker->local_tests_timedout += 1;
+                *(info->char_to_print) = 'T';
+                result.size += push_string8_format(info->arena, String8Literal("%S\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout]).size;
+            }
+            else
+            {
+                info->worker->local_tests_crashed += 1;
+                *(info->char_to_print) = 'C';
+
+                if(info->payload->crash_signal == SIGSEGV)
+                {
+                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Segmentation Fault (Signal 11)\n")).size;
+                }
+                else if (info->payload->crash_signal == SIGABRT)
+                {
+                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Double Free or Heap Corruption (Signal 6)\n")).size;
+                }
+                else if(info->payload->crash_signal == SIGBUS)
+                {
+                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Bus Error (Signal 10)\n")).size;
+                }
+                else
+                {
+                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed with signal: %u\n"), info->payload->crash_signal).size;
+                }
+            }
+        }
+        else if(!(info->payload->flags & TestPayloadFlag_NoMemoryLeak))
+        {
+            info->worker->local_tests_leaked += 1;
+            *(info->char_to_print) = 'M';
+            S64 leak_count = info->payload->leak_count;
+            String8 object_text = leak_count > 1 ? String8Literal("objects were") : String8Literal("object was");
+            result.size += push_string8_format(info->arena, String8Literal("%S %i %S not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, object_text, info->group->name).size;
+        }
+
+        result.size += push_string8_format(info->arena, String8Literal("<<<(End of test report)<<<\n\n")).size;
+    }
     return(result);
 }

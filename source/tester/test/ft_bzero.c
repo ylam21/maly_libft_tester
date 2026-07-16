@@ -36,6 +36,17 @@ TestPayload callback_for_bzero(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
+
+    if(!thread_static_allocation_count)
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
     payload.leak_count = thread_static_allocation_count;
 
     return(payload);

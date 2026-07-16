@@ -1,3 +1,16 @@
+#include <setjmp.h>
+#include <signal.h>
+
+// These are exclusively used by the isolated child processes
+global sigjmp_buf global_jump_buffer;
+global int        global_caught_signal;
+
+internal_function void crash_handler(int signum)
+{
+    global_caught_signal = signum;
+    siglongjmp(global_jump_buffer, 1);
+}
+
 read_only global TestGroup *global_test_groups[TESTER_MAXIMUM_TEST_GROUP_COUNT] =
 {
     // Libc Functions
@@ -48,16 +61,11 @@ read_only global TestGroup *global_test_groups[TESTER_MAXIMUM_TEST_GROUP_COUNT] 
 };
 
 internal_function
-void run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group, U64 test_index, U32 *header_was_not_copied)
+void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, TestGroup *test_group)
 {
+    TestPayload payloads[TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT] = {0};
     TestReportFlags flags = 0;
-    S64 error_code = 0;
-    TestPayload payload    = {0};
-    S64 bytes_read         = 0;
-
-    // Set 'F' for failed test as the default.
-    U8 character_to_print = 'F';
-
+    S32 error_code = 0;
     int pipefd[2];
     if(pipe(pipefd) != -1)
     {
@@ -69,53 +77,53 @@ void run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group
             dup2(global_dev_null_fd, STDOUT_FILENO);
             dup2(global_dev_null_fd, STDERR_FILENO);
 
-            alarm(1);
+            struct sigaction sa = {0};
+            sa.sa_handler = crash_handler;
+            sigemptyset(&sa.sa_mask);
+            sa.sa_flags = 0;
+            sigaction(SIGSEGV, &sa, 0); // Segmentation Fault
+            sigaction(SIGBUS,  &sa, 0); // Bus Error
+            sigaction(SIGABRT, &sa, 0); // Double Free / Abort
 
-            TestParameters test_parameters = test_group->tests[test_index];
-            payload = test_group->callback(test_parameters);
+            TestPayload payloads[TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT] = {0};
 
-            write(pipefd[1], &payload, sizeof(payload));
+            for(U64 test_index = 0; test_index < test_group->test_count; test_index += 1)
+            {
+                global_caught_signal = 0;
+
+                if(sigsetjmp(global_jump_buffer, 1) == 0)
+                {
+                    alarm(1);
+                    payloads[test_index] = test_group->callback(test_group->tests[test_index]);
+                    alarm(0);
+                }
+                else
+                {
+                    payloads[test_index].flags = 0;
+                    payloads[test_index].crash_signal = global_caught_signal;
+                }
+            }
+            write(pipefd[1], payloads, sizeof(TestPayload) * test_group->test_count);
             close(pipefd[1]);
             exit(0);
         }
         else if(pid > 0) // Parent Process
         {
             close(pipefd[1]);
-            bytes_read = (S64)read(pipefd[0], &payload, sizeof(payload));
+
+            S64 bytes_read = (S64)read(pipefd[0], payloads, sizeof(TestPayload) * test_group->test_count);
             close(pipefd[0]);
+            if(bytes_read != (S64)(sizeof(TestPayload) * test_group->test_count))
+            {
+                flags |= TestReportFlag_ErrorPayloadRead;
+            }
 
             int status;
             if(waitpid(pid, &status, 0) != -1)
             {
                 if(WIFEXITED(status))
                 {
-                    if(WEXITSTATUS(status) == 0)
-                    {
-                        if(bytes_read == sizeof(payload))
-                        {
-                            if(payload.leak_count > 0)
-                            {
-                                flags |= TestReportFlag_MemoryLeaked;
-                                test_worker->local_tests_leaked += 1;
-                                character_to_print = 'M';
-                            }
-                            if(!(payload.flags & TestPayloadFlag_ResultsMatch))
-                            {
-                                flags |= TestReportFlag_ResultsDoNotMatch;
-                            }
-                            if(!(payload.leak_count > 0) && (payload.flags & TestPayloadFlag_ResultsMatch))
-                            {
-                                flags |= TestReportFlag_TestPassed;
-                                test_worker->local_tests_passed += 1;
-                                character_to_print = '.';
-                            }
-                        }
-                        else
-                        {
-                            flags |= TestReportFlag_ErrorPayloadRead;
-                        }
-                    }
-                    else
+                    if(WEXITSTATUS(status) != 0)
                     {
                         flags     |= TestReportFlag_ErrorExitNonZero;
                         error_code = WEXITSTATUS(status);
@@ -126,14 +134,10 @@ void run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group
                     if(WTERMSIG(status) == SIGALRM)
                     {
                         flags |= TestReportFlag_ErrorTimeout;
-                        test_worker->local_tests_timedout += 1;
-                        character_to_print = 'T';
                     }
                     else
                     {
                         flags |= TestReportFlag_ErrorChildCrashed;
-                        test_worker->local_tests_crashed += 1;
-                        character_to_print = 'C';
                     }
                     error_code  = WTERMSIG(status);
                 }
@@ -156,38 +160,78 @@ void run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group
         flags |= TestReportFlag_ErrorPipe;
     }
 
-
-    if(!(flags & TestReportFlag_TestPassed))
+    if(!(flags & 0x007f))
     {
-        test_worker->local_tests_failed += 1;
-
         TemporaryArena scratch = ScratchArenaBegin(0);
+        // Copy the group name
+        String8 name_with_padding = push_string8_format(scratch.arena, String8Literal("%-20S"), test_group->name);
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, name_with_padding);
+        test_worker->local_test_groups_summary.size += name_with_padding.size;
 
-        TestReport test_report =
+        U32 local_tests_passed_before = test_worker->local_tests_passed;
+
+        U32 header_was_not_copied = 1;
+        for(U64 payload_index = 0; payload_index < test_group->test_count; payload_index += 1)
         {
-            .flags        = flags,
-            .error_code   = error_code,
-            .test_group   = test_group,
-            .test_payload = &payload,
-            .test_index   = test_index,
-        };
-        String8 debug_info = debug_info_from_test_report(scratch.arena, &test_report, header_was_not_copied);
-        MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, debug_info);
-        test_worker->local_test_groups_report.size += debug_info.size;
+            U8 char_to_print;
+
+            DebugInfoBuilder info =
+            {
+                .arena                 = scratch.arena,
+                .worker                = test_worker,
+                .group                 = test_group,
+                .payload               = &payloads[payload_index],
+                .char_to_print         = &char_to_print,
+                .header_was_not_copied = &header_was_not_copied,
+                .test_index            = payload_index,
+            };
+            String8 debug_info = debug_info_from_payload(&info);
+
+            MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, debug_info);
+            test_worker->local_test_groups_report.size += debug_info.size;
+
+            // Copy the character_to_print
+            if(test_worker->flags & TesterFlag_NoColors)
+            {
+                MemoryCopy(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, &char_to_print, sizeof(U8));
+                test_worker->local_test_groups_summary.size += sizeof(U8);
+            }
+            else
+            {
+                MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, global_color_table_for_characters[char_to_print]);
+                test_worker->local_test_groups_summary.size += global_color_table_for_characters[char_to_print].size;
+            }
+        }
+
+        U32 local_tests_passed_after = test_worker->local_tests_passed;
+        U32 local_tests_failed  = test_group->test_count - (local_tests_passed_after - local_tests_passed_before);
+
+        if(!header_was_not_copied)
+        {
+            String8 footer = push_string8_format(scratch.arena, String8Literal("(End of debug information for failed test group %S)\n"
+                                                                               "(Total failed tests for this group was %u)\n"
+                                                                               "----------------------------------------\n"), test_group->name, local_tests_failed);
+            // Copy the stats
+            MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, footer);
+            test_worker->local_test_groups_report.size += footer.size;
+        }
+
+
+        String8 stats   = push_string8_format(scratch.arena, String8Literal("%2u / %2u"), local_tests_passed_after - local_tests_passed_before, test_group->test_count);
+        String8 padding = padding_for_stats(scratch.arena, test_group->test_count);
+        String8 stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S\n"), padding, stats);
+
+        // Copy the stats
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
+        test_worker->local_test_groups_summary.size += stats_with_padding.size;
 
         ScratchArenaEnd(scratch);
     }
-
-    // Copy the character_to_print
-    if(test_worker->flags & TesterFlag_NoColors)
-    {
-        MemoryCopy(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, &character_to_print, sizeof(U8));
-        test_worker->local_test_groups_summary.size += sizeof(U8);
-    }
     else
     {
-        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, global_color_table_for_characters[character_to_print]);
-        test_worker->local_test_groups_summary.size += global_color_table_for_characters[character_to_print].size;
+        (void)error_code;
+        Print("Fatal Crash. Exiting Now.\n");
+        exit(1);
     }
 }
 
@@ -239,53 +283,25 @@ void *worker_thread_routine(void *params)
         }
 
         TestGroup *test_group = global_test_groups[test_group_index];
-
-        U32 test_count = test_group->test_count;
-        U32 local_tests_passed_before = test_worker->local_tests_passed;
-
-        // Copy the group name
-        name_with_padding = push_string8_format(scratch.arena, String8Literal("%-20S"), test_group->name);
-        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, name_with_padding);
-        test_worker->local_test_groups_summary.size += name_with_padding.size;
-
         if(test_group->libft_function != 0)
         {
-            U32 header_was_not_copied = 1;
             test_worker->local_test_groups_tested += 1;
-            for(U64 test_index = 0; test_index < test_count; test_index += 1)
-            {
-                ProfilerBlockBegin(run_and_eval);
-                run_and_evaluate_test(test_worker, test_group, test_index, &header_was_not_copied);
-                ProfilerBlockEnd(run_and_eval);
-            }
-            U32 local_tests_passed_after = test_worker->local_tests_passed;
 
-            U32 local_failed_test_count = test_count - (local_tests_passed_after - local_tests_passed_before);
-            if(local_failed_test_count != 0) // Copy footer
-            {
-                String8 footer = push_string8_format(scratch.arena, String8Literal("(End of debug information for failed test group %S\n)"
-                                                                                   "Total failed tests for this group was %u\n)"
-                                                                                   "----------------------------------------\n"), test_group->name, local_failed_test_count);
-                // Copy the stats
-                MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, footer);
-                test_worker->local_test_groups_report.size += footer.size;
-            }
+            run_all_tests_for_test_group_and_evaluate(test_worker, test_group);
 
-            stats   = push_string8_format(scratch.arena, String8Literal("%2u / %2u"), local_tests_passed_after - local_tests_passed_before, test_count);
-            padding = padding_for_stats(scratch.arena, test_count);
-            stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S\n"), padding, stats);
         }
         else
         {
-            test_worker->local_tests_skipped += test_count;
-            stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_count);
+            test_worker->local_tests_skipped += test_group->test_count;
+
+            stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_group->test_count);
             padding = padding_for_stats(scratch.arena, global_symbol_missing_text.size - 5);
             stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S%S\n"), global_symbol_missing_text, padding, stats);
-        }
 
-        // Copy the stats
-        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
-        test_worker->local_test_groups_summary.size += stats_with_padding.size;
+            // Copy the stats
+            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
+            test_worker->local_test_groups_summary.size += stats_with_padding.size;
+        }
     }
 
     ScratchArenaEnd(scratch);

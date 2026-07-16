@@ -19,6 +19,16 @@ TestPayload callback_for_strlen(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
+    if(!thread_static_allocation_count)
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
     payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_return;
     payload.got_value      = (U64)got_return;

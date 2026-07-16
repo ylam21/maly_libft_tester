@@ -56,6 +56,7 @@ TestPayload callback_for_lstiter(TestParameters test_parameters)
     if((all_updated == 1) && (count == list_size))
     {
         payload.flags |= TestPayloadFlag_ResultsMatch;
+        payload.flags |= TestPayloadFlag_TestPassed;
     }
 
     current = head;

@@ -38,6 +38,16 @@ TestPayload callback_for_lstdelone(TestParameters test_parameters)
         payload.flags |= TestPayloadFlag_ResultsMatch;
     }
 
+    if(!thread_static_allocation_count)
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
     payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = 1;
     payload.got_value      = fake_delete_call_count;

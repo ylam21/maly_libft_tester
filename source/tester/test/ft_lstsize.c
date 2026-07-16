@@ -35,6 +35,16 @@ TestPayload callback_for_lstsize(TestParameters test_parameters)
         current = next;
     }
 
+    if(!(thread_static_allocation_count > 0))
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
     payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = (U64)expected_size;
     payload.got_value      = (U64)got_size;

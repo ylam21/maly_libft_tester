@@ -132,18 +132,20 @@ t_list				*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 #pragma weak ft_lstmap        /* 42 */
 
 // Tester Test Types
-
-#define TESTER_MAXIMUM_PAYLOAD_STRINGS 16
+#define TESTER_MAXIMUM_PAYLOAD_STRINGS      16
 #define TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE  512
 
 typedef U8 TestPayloadFlags;
 enum
 {
-    TestPayloadFlag_ResultsMatch  = (1<<0),
+    TestPayloadFlag_ResultsMatch = (1<<0),
+    TestPayloadFlag_NoMemoryLeak = (1<<1),
+    TestPayloadFlag_TestPassed   = (1<<2),
 };
 
 struct TestPayload
 {
+    int                 crash_signal;
     TestPayloadFlags    flags;
     S64                 leak_count;
 
@@ -161,9 +163,9 @@ struct TestPayload
 
 // Tester Main Test Functions
 internal_function void    *worker_thread_routine(void *params);
-internal_function void    run_and_evaluate_test(TestWorkerContext *test_worker, TestGroup *test_group, U64 test_index, U32 *header_was_not_copied);
-internal_function void    print_tests_statistics(U64 test_count, U64 failed_test_count, U32 tests_were_skipped);
+internal_function void    run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, TestGroup *test_group);
 internal_function String8 padding_for_stats(Arena *arena, U32 test_count);
+internal_function void crash_handler(int signum);
 
 // Test Callback Functions
 internal_function TestPayload callback_for_bzero(TestParameters test_parameters);

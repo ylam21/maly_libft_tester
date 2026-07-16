@@ -31,6 +31,11 @@ TestPayload callback_for_lstadd_front(TestParameters test_parameters)
 
     payload.leak_count = thread_static_allocation_count;
 
+    if(!thread_static_allocation_count)
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
     if(head != 0 && head->content != 0)
     {
         U64 got_length = length_of_cstring((char *)head->content) + 1;
@@ -51,6 +56,11 @@ TestPayload callback_for_lstadd_front(TestParameters test_parameters)
     if(new_node != 0)
     {
         free(new_node);
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
     }
 
     payload.expected_value = 0;

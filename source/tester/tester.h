@@ -193,21 +193,25 @@ enum
 };
 
 
+
+
 typedef U16 TestReportFlags;
 enum
 {
-    TestReportFlag_TestPassed         = (1<<0),
-    TestReportFlag_MemoryLeaked       = (1<<1),
-    TestReportFlag_ResultsDoNotMatch  = (1<<2),
-    TestReportFlag_ErrorPipe          = (1<<3),
-    TestReportFlag_ErrorFork          = (1<<4),
-    TestReportFlag_ErrorErrnoSet      = (1<<5),
-    TestReportFlag_ErrorExitNonZero   = (1<<6),
-    TestReportFlag_ErrorChildCrashed  = (1<<7),
-    TestReportFlag_ErrorPayloadRead   = (1<<8),
-    TestReportFlag_ErrorTimeout       = (1<<9),
+    TestReportFlag_ErrorPipe          = (1<<0),
+    TestReportFlag_ErrorFork          = (1<<1),
+    TestReportFlag_ErrorExitNonZero   = (1<<2),
+    TestReportFlag_ErrorErrnoSet      = (1<<3),
+    TestReportFlag_ErrorChildCrashed  = (1<<4),
+    TestReportFlag_ErrorPayloadRead   = (1<<5),
+    TestReportFlag_ErrorTimeout       = (1<<6),
+    TestReportFlag_TestPassed         = (1<<8),
+    TestReportFlag_MemoryLeaked       = (1<<9),
+    TestReportFlag_ResultsDoNotMatch  = (1<<10),
 };
 
+// 0b 0000 0000 0000 0000
+// 0b 0000 0000 0111 1111  -> mask: 0x007f
 
 typedef struct TestGroup TestGroup;
 typedef struct TestReport TestReport;
@@ -221,15 +225,6 @@ typedef U8 TesterFlags;
 enum
 {
     TesterFlag_NoColors = (1<<0),
-};
-
-struct TestReport
-{
-    TestReportFlags     flags;
-    S64                 error_code;
-    TestGroup           *test_group;
-    U32                 test_index;
-    TestPayload         *test_payload;
 };
 
 struct TestWorkerContext
@@ -262,8 +257,6 @@ struct TestGroup
     void                 *libft_function;
     TestCallbackFunction callback;
 };
-
-
 
 struct Tester
 {

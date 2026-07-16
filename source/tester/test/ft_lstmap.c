@@ -91,6 +91,16 @@ TestPayload callback_for_lstmap(TestParameters test_parameters)
         curr_old = next;
     }
 
+    if(!thread_static_allocation_count)
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
     payload.leak_count     = thread_static_allocation_count;
 
     curr_new = new_head;

@@ -94,6 +94,17 @@ TestPayload callback_for_lstadd_back(TestParameters test_parameters)
         free(new_node);
     }
 
+    if(!(thread_static_allocation_count > 0))
+    {
+        payload.flags |= TestPayloadFlag_NoMemoryLeak;
+    }
+
+    if((payload.flags & TestPayloadFlag_ResultsMatch) && (payload.flags & TestPayloadFlag_NoMemoryLeak))
+    {
+        payload.flags |= TestPayloadFlag_TestPassed;
+    }
+
+
     payload.leak_count     = thread_static_allocation_count;
     payload.expected_value = 0;
     payload.got_value      = 0;
