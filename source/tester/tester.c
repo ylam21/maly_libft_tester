@@ -32,7 +32,7 @@ void tester_run(Tester *tester)
     U64 summary_size_for_all_test_groups = TESTER_MAXIMUM_TEST_GROUP_COUNT * summary_size_for_test_group;
     U8 *shared_test_group_summary_start  = push_array(tester->permanent_arena, U8, summary_size_for_all_test_groups);
 
-    U64 report_size_for_test            = 500; // these should be defined macros of global read_only variables
+    U64 report_size_for_test            = 1024; // these should be defined macros of global read_only variables
     U64 report_size_for_test_group      = TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT  * report_size_for_test;
     U64 report_size_for_all_test_groups = TESTER_MAXIMUM_TEST_GROUP_COUNT * report_size_for_test_group;
     U8 * shared_test_group_report_start = push_array(tester->permanent_arena, U8, report_size_for_all_test_groups);

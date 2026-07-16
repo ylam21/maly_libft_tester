@@ -3,7 +3,7 @@
 #endif // BUILD_DEBUG
 
 #ifndef ENABLE_PROFILER
-    #define ENABLE_PROFILER    0
+    #define ENABLE_PROFILER    1
 #endif // ENABLE_PROFILER
 
 #include "base/base_include.h"
@@ -36,6 +36,7 @@ int main(int argument_count, char **arguments)
     ProfilerReport profiler_report = profiler_end(tester.permanent_arena);
 
     print_tester_summary(&tester, profiler_report.total_time_elapsed_in_seconds);
+    write(STDOUT_FILENO, profiler_report.full_report.str, profiler_report.full_report.size);
 
     return(0);
 }

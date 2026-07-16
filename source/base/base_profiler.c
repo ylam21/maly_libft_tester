@@ -68,6 +68,7 @@ ProfilerReport profiler_end(Arena *arena)
 				{
 				    F64 mib_count = (F64)b->processed_byte_count / (F64)MiB(1);
 					// final_string_size += push_string8_format(arena, String8Literal(" | %5.3f MiB at %5.3f GiB/s\n"), mib_count, gib_per_sec).size;
+					(void)gib_per_sec;
 					final_string_size += push_string8_format(arena, String8Literal(" | %u tests at %5.3f tests/s\n"), b->processed_byte_count, bytes_per_sec).size;
 				}
 				else

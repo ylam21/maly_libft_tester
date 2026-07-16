@@ -205,34 +205,39 @@ String8 padding_for_stats(Arena *arena, U32 test_count)
 internal_function
 void *worker_thread_routine(void *params)
 {
+    initialize_thread_context();
     TestWorkerContext *test_worker = (TestWorkerContext *)params;
 
-    String8 tester_start_header;
+    String8 tester_start_header = {0};
     String8 stats;
     String8 padding;
     String8 stats_with_padding;
     String8 name_with_padding;
 
     TemporaryArena scratch = ScratchArenaBegin(0);
-    if(test_worker->test_group_start_index == 0)
-    {
-        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Testing for Libft Subject Version %S ---\n"
-                                                                                "\n--- Part 1 - Libc Functions ---\n"), tester_get_supported_libft_subject_version());
-    }
-    else if(test_worker->test_group_start_index == 22)
-    {
-        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 2 - Additional Functions ---\n"));
-    }
-    else if(test_worker->test_group_start_index == 33)
-    {
-        tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 3 - Linked List Functions ---\n"));
-    }
-
-    MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
-    test_worker->local_test_groups_summary.size += tester_start_header.size;
 
     for(U64 test_group_index = test_worker->test_group_start_index; test_group_index < test_worker->test_group_end_index; test_group_index += 1)
     {
+        if(test_group_index == 0)
+        {
+            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Testing for Libft Subject Version %S ---\n"
+                                                                                    "\n--- Part 1 - Libc Functions ---\n"), tester_get_supported_libft_subject_version());
+            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+            test_worker->local_test_groups_summary.size += tester_start_header.size;
+        }
+        else if(test_group_index == 22)
+        {
+            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 2 - Additional Functions ---\n"));
+            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+            test_worker->local_test_groups_summary.size += tester_start_header.size;
+        }
+        else if(test_group_index == 33)
+        {
+            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 3 - Linked List Functions ---\n"));
+            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+            test_worker->local_test_groups_summary.size += tester_start_header.size;
+        }
+
         TestGroup *test_group = global_test_groups[test_group_index];
 
         U32 test_count = test_group->test_count;
@@ -249,7 +254,9 @@ void *worker_thread_routine(void *params)
             test_worker->local_test_groups_tested += 1;
             for(U64 test_index = 0; test_index < test_count; test_index += 1)
             {
+                ProfilerBlockBegin(run_and_eval);
                 run_and_evaluate_test(test_worker, test_group, test_index, &header_was_not_copied);
+                ProfilerBlockEnd(run_and_eval);
             }
             U32 local_tests_passed_after = test_worker->local_tests_passed;
 
