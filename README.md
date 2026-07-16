@@ -4,7 +4,7 @@
 
 Currently up-to-date with Libft subject version 19.2.
 
-This tester executes over 500 tests in under 0.3 seconds.<br>
+This tester executes over 500 tests in under 0.02 seconds.<br>
 
 # Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -32,7 +32,7 @@ Run the tests:
 ```bash
 ./tester
 ```
-For more information (like output files or no-fork mode), run:
+For more information about command-line arguments that can be parsed, run:
 ```bash
 ./tester --help
 ```
@@ -55,7 +55,7 @@ Make sure to update the path to point to where you cloned the tester:<br>
 ```make
 #  The Maly Libft Tester Setup for Makefile
 TESTER_DIRECTORY := ../maly_libft_tester
-TESTER_ARGUMENTS := 
+TESTER_ARGUMENTS := --set-timeout-ms 50
 ```
 Create a new rule named test:
 ```make
