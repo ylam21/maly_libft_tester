@@ -18,6 +18,7 @@
 // Operating System Cracking
 #if defined(__gnu_linux__) || defined(__linux__)
     #define OS_LINUX 1
+    #define OS_POSIX 1
 #else
     #error Operating System not supported.
 #endif
@@ -33,6 +34,10 @@
 
 #if !defined(OS_MAC)
     #define OS_MAC 0
+#endif
+
+#if !defined(OS_POSIX)
+    #define OS_POSIX 0
 #endif
 
 #endif // BASE_CONTEXT_CRACKING_H

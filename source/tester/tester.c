@@ -60,7 +60,7 @@ void tester_run(Tester *tester)
         workers[thread_index].flags   = tester->flags;
 
         workers[thread_index].test_group_start_index = current_test_group_index;
-        U64 test_groups_for_this_thread = chunk_size + (thread_index < remainder ? 1 : 0); // why 1:0 and not 3:0 or any other x:0?
+        U64 test_groups_for_this_thread = chunk_size + (thread_index < remainder ? 1 : 0);
         workers[thread_index].test_group_end_index = current_test_group_index + test_groups_for_this_thread;
 
         workers[thread_index].local_test_groups_summary.str = shared_test_group_summary_start + (summary_size_for_test_group * current_test_group_index);
