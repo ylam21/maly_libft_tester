@@ -18,6 +18,8 @@
 // Operating System Cracking
 #if defined(__gnu_linux__) || defined(__linux__)
     #define OS_LINUX 1
+# elif defined(__APPLE__) && defined(__MACH__)
+    #define OS_MAC 1
 #else
     #error Operating System not supported.
 #endif
