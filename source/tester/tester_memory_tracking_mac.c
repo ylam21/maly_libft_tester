@@ -1,9 +1,6 @@
 #undef malloc
 #undef free
 
-extern void *malloc(size_t size);
-extern void free(void *ptr);
-
 // Tester Memory Tracking Wrapper Functions
 void *__wrap_malloc(size_t size)
 {
