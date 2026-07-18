@@ -37,13 +37,14 @@ elif [[ "$OS_NAME" = "Darwin" ]]; then
 
         $COMPILER              \
         $CFLAGS                \
-        -fPIE -pie             \
+        -fPIE                  \
         -I"$INPUT_PATH"        \
         -Dmalloc=__wrap_malloc \
         -Dfree=__wrap_free     \
         $TESTER_SOURCE_FILE    \
         $LIBFT_SOURCE_FILES    \
         $LDFLAGS               \
+        -pie                   \
         -o $NAME
     else
         echo "Usage: ./build.sh <path/to/libft/directory>"
