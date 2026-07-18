@@ -24,16 +24,18 @@ if [ -z "$LIBFT_SOURCE_FILES" ]; then
     exit 1
 fi
 
-$COMPILER  -Wall -Wextra                             \
+$COMPILER  -Wall -Wextra -Werror                     \
            -Wno-unused-function                      \
            -Wno-unused-variable                      \
-           -I"$LIBFT_DIRECTORY"                      \
+           -fPIE                                     \
+           -I"$LIBFT_DIRECTORY"                          \
            -Dmalloc=__wrap_malloc                    \
            -Dfree=__wrap_free                        \
-           "$TESTER_SOURCE_FILE"                     \
-           $LIBFT_SOURCE_FILES                       \
+           "$TESTER_SOURCE_FILE"                            \
+           $LIBFT_SOURCE_FILES \
            -lm                                       \
            $BSD_FLAG                                 \
+           -pie                                      \
            -o "$NAME"
 
 if [ $? -eq 0 ]; then
