@@ -9,18 +9,20 @@
 #if OS_LINUX
     #include <linux/limits.h>
     #include <sys/sysinfo.h>
+    #include <features.h>
+    #include <sys/sendfile.h>
 #elif OS_MAC
     #include <mach/mach.h>
     #include <limits.h>
+    #include <sys/socket.h>
+    #include <sys/uio.h>
 #endif
 
 #include <dirent.h>
 #include <dlfcn.h>
-#include <dlfcn.h>
 #include <errno.h>
 #include <execinfo.h>
 #include <fcntl.h>
-#include <features.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
@@ -28,7 +30,6 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/random.h>
-#include <sys/sendfile.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
