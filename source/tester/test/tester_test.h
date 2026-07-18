@@ -11,7 +11,11 @@
 //     <bsd/string.h> and compile with the -lbsd flag.
 //     This behaviour is specific to glibc systems. If you are curious,
 //     take the opportunity to explore the differences between glibc and BSD libc.
-#include <bsd/string.h>
+#if OS_LINUX
+    #include <bsd/string.h>
+#elif OS_MAC
+    #include <string.h>
+#endif
 
 // Why manual declarations and #pragma weak?
 //

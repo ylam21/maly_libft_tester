@@ -1,7 +1,13 @@
+#undef malloc
+#undef free
+
+extern void *malloc(size_t size);
+extern void free(void *ptr);
+
 // Tester Memory Tracking Wrapper Functions
 void *__wrap_malloc(size_t size)
 {
-    void *ptr = __real_malloc(size);
+    void *ptr = malloc(size);
     if(ptr != NULL)
     {
         memset(ptr, 0xCC, size);
@@ -15,31 +21,9 @@ void __wrap_free(void *ptr)
     if(ptr != NULL)
     {
         thread_static_allocation_count -= 1;
-        __real_free(ptr);
+        free(ptr);
     }
 }
 
-void *__wrap_calloc(size_t nmemb, size_t size)
-{
-    void *ptr = __real_calloc(nmemb, size);
-    if(ptr != NULL)
-    {
-        thread_static_allocation_count += 1;
-    }
-    return(ptr);
-}
-
-void *__wrap_realloc(void *ptr, size_t size)
-{
-    void *new_ptr = __real_realloc(ptr, size);
-
-    if(ptr == NULL && new_ptr != NULL)
-    {
-        thread_static_allocation_count += 1;
-    }
-    else if(ptr != NULL && size == 0)
-    {
-        thread_static_allocation_count -= 1;
-    }
-    return(new_ptr);
-}
+#define malloc  __wrap_malloc
+#define free    __wrap_free

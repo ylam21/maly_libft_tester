@@ -15,6 +15,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 ////////////////////////////////
 // Codebase Keywords

@@ -207,8 +207,7 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
         if(!header_was_not_copied)
         {
             String8 footer = push_string8_format(scratch.arena, String8Literal("(End of debug information for failed test group %S)\n"
-                                                                               "(Total failed tests for this group was %u)\n"
-                                                                               "----------------------------------------\n"), test_group->name, local_tests_failed);
+                                                                               "(Total failed tests for this group was %u)\n"), test_group->name, local_tests_failed);
             // Copy the stats
             MemoryCopyString8(test_worker->local_test_groups_report.str + test_worker->local_test_groups_report.size, footer);
             test_worker->local_test_groups_report.size += footer.size;
