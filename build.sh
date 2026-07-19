@@ -29,11 +29,24 @@ if [[ "$OS_NAME" = "Linux" ]]; then
 elif [[ "$OS_NAME" = "Darwin" ]]; then
     LDFLAGS="-lm"
 
-    $COMPILER                             \
-    $CFLAGS                               \
-    $TESTER_SOURCE_FILE                   \
-    -Wl,-force_load,"$LIBFT_ARCHIVE_PATH" \
-    $LDFLAGS                              \
+    # We map all libft functions to the -U flag (allow undefined) to prevent linking errors.
+    ALLOWED_UNDEFINED=""
+    for func in ft_isalpha ft_isdigit ft_isalnum ft_isascii ft_isprint ft_strlen ft_memset \
+                ft_bzero ft_memcpy ft_memmove ft_strlcpy ft_strlcat ft_toupper ft_tolower \
+                ft_strchr ft_strncmp ft_memchr ft_memcmp ft_strnstr ft_atoi ft_calloc ft_strdup \
+                ft_substr ft_strjoin ft_strtrim ft_split ft_itoa ft_strmapi ft_striteri \
+                ft_putchar_fd ft_putstr_fd ft_putendl_fd ft_putnbr_fd \
+                ft_lstnew ft_lstadd_front ft_lstsize ft_lstlast ft_lstadd_back ft_lstdelone \
+                ft_lstclear ft_lstiter ft_lstmap; do
+        ALLOWED_UNDEFINED="$ALLOWED_UNDEFINED -Wl,-U,_$func"
+    done
+
+    $COMPILER                         \
+    $CFLAGS                           \
+    $TESTER_SOURCE_FILE               \
+    -Wl,-force_load,"$INPUT_PATH"     \
+    $ALLOWED_UNDEFINED                \
+    $LDFLAGS                          \
     -o $NAME
 
 else
