@@ -10,7 +10,8 @@ NAME="tester"
 OS_NAME=$(uname -s)
 COMPILER=gcc
 CFLAGS="-Wall -Wextra -Werror -Wno-unused-function -Wno-unused-variable"
-TESTER_SOURCE_FILE="./source/main.c" # Note: I recommend to change this to an absolute path.
+TESTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TESTER_SOURCE_FILE="$TESTER_DIR/source/main.c"
 
 if [[ "$OS_NAME" = "Linux" ]]; then
     LDFLAGS="-lm -lbsd"
