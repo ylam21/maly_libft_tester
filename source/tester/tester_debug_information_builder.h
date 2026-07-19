@@ -1,7 +1,7 @@
 #ifndef TESTER_DEBUG_INFORMATION_BUILDER_H
 #define TESTER_DEBUG_INFORMATION_BUILDER_H
 
-#define TESTER_MAXIMUM_VIEW_BYTES_FOR_PRINT 64
+#define TESTER_MAXIMUM_VIEW_BYTES_FOR_PRINT 32
 
 typedef struct DebugInfoBuilder DebugInfoBuilder;
 struct DebugInfoBuilder

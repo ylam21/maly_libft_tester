@@ -65,12 +65,11 @@ U64 push_function_parameters_from_test_group(Arena *arena, TestGroup *test_group
     TemporaryArena scratch = ScratchArenaBegin(arena);
     U64 size = 0;
 
-    size += push_string8_format(arena, String8Literal("[Index] %u\n"), test_index).size;
-    size += push_string8_format(arena, String8Literal("[Function Parameters]:\n")).size;
-    String8 pointer_text = String8Literal("(Pointer)");
-    String8 size_text   = String8Literal("(Size)");
-    String8 int_text   = String8Literal("(Int)");
-    String8 char_text   = String8Literal("(Char)");
+    size += push_string8_format(arena, String8Literal("Test index: %u\n\n"), test_index).size;
+    String8 pointer_text = String8Literal("Pointer:");
+    String8 size_text   = String8Literal("Size:");
+    String8 int_text   = String8Literal("Int:");
+    String8 char_text   = String8Literal("Char:");
     String8 memory_view;
     String8 string_view;
     TestParameters test = test_group->tests[test_index];
@@ -87,112 +86,112 @@ U64 push_function_parameters_from_test_group(Arena *arena, TestGroup *test_group
         case TestParametersType_Int:
         {
             TestParameters_Int function_parameters = (TestParameters_Int)test.single_int;
-            size += push_string8_format(arena, String8Literal("%-10S %i\n"), int_text, function_parameters.a).size;
+            size += push_string8_format(arena, String8Literal("1st %-10S %i\n"), int_text, function_parameters.a).size;
         } break;
         case TestParametersType_PtrSize:
         {
             TestParameters_PtrSize function_parameters = (TestParameters_PtrSize)test.ptr_size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %u\n"), size_text, function_parameters.size).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %u\n"), size_text, function_parameters.size).size;
         } break;
         case TestParametersType_Ptr:
         {
             TestParameters_Ptr function_parameters = (TestParameters_Ptr)test.ptr;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
         } break;
         case TestParametersType_PtrSizeSize:
         {
             TestParameters_PtrSizeSize function_parameters = (TestParameters_PtrSizeSize)test.ptr_size_size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %u\n"), size_text, function_parameters.size1).size;
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %u\n"), size_text, function_parameters.size2).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %u\n"), size_text, function_parameters.size1).size;
+            size += push_string8_format(arena, String8Literal("3rd arg %-10S %u\n"), size_text, function_parameters.size2).size;
         } break;
         case TestParametersType_PtrInt:
         {
             TestParameters_PtrInt function_parameters = (TestParameters_PtrInt)test.ptr_int;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %i\n"), size_text, function_parameters.a).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %i\n"), size_text, function_parameters.a).size;
         } break;
         case TestParametersType_PtrIntSize:
         {
             TestParameters_PtrIntSize function_parameters = (TestParameters_PtrIntSize)test.ptr_int_size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %u\n"), int_text,  function_parameters.a).size;
-            size += push_string8_format(arena, String8Literal("%-10S %u\n"), size_text, function_parameters.size).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %u\n"), int_text,  function_parameters.a).size;
+            size += push_string8_format(arena, String8Literal("3rd arg %-10S %u\n"), size_text, function_parameters.size).size;
         } break;
         case TestParametersType_PtrPtrSize:
         {
             TestParameters_PtrPtrSize function_parameters = (TestParameters_PtrPtrSize)test.ptr_ptr_size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr1);
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr1, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr1, memory_view).size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr2);
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr2, memory_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr2, memory_view).size;
             string_view = get_string_view(scratch.arena, function_parameters.ptr1);
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %p -> (String View) %S\n"), pointer_text, function_parameters.ptr1, string_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr1, string_view).size;
             string_view = get_string_view(scratch.arena, function_parameters.ptr2);
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %p -> (String View) %S\n"), pointer_text, function_parameters.ptr2, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %u\n"), size_text, function_parameters.size).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr2, string_view).size;
+            size += push_string8_format(arena, String8Literal("3rd arg %-10S %u\n"), size_text, function_parameters.size).size;
         } break;
         case TestParametersType_PtrChar:
         {
             TestParameters_PtrChar function_parameters = (TestParameters_PtrChar)test.ptr_char;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %c\n"), char_text, function_parameters.c).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %c\n"), char_text, function_parameters.c).size;
         } break;
         case TestParametersType_IntPtr:
         {
             TestParameters_IntPtr function_parameters = (TestParameters_IntPtr)test.int_ptr;
-            size += push_string8_format(arena, String8Literal("%-10S %i\n"), char_text, function_parameters.a).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %i\n"), char_text, function_parameters.a).size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr);
             string_view = get_string_view(scratch.arena, function_parameters.ptr);
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
-            size += push_string8_format(arena, String8Literal("%-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr, memory_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr, string_view).size;
         } break;
         case TestParametersType_Char:
         {
             TestParameters_Char function_parameters = (TestParameters_Char)test.single_char;
-            size += push_string8_format(arena, String8Literal("%-10S %c\n"), char_text, function_parameters.c).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %c\n"), char_text, function_parameters.c).size;
         } break;
         case TestParametersType_PtrPtr:
         {
             TestParameters_PtrPtr function_parameters = (TestParameters_PtrPtr)test.ptr_ptr;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr1);
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr1, memory_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr1, memory_view).size;
             memory_view = get_memory_view(scratch.arena, function_parameters.ptr2);
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr2, memory_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (Memory View) %S\n"), pointer_text, function_parameters.ptr2, memory_view).size;
             string_view = get_string_view(scratch.arena, function_parameters.ptr1);
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %p -> (String View) %S\n"), pointer_text, function_parameters.ptr1, string_view).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr1, string_view).size;
             string_view = get_string_view(scratch.arena, function_parameters.ptr2);
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %p -> (String View) %S\n"), pointer_text, function_parameters.ptr2, string_view).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %p -> (String View) %S\n"), pointer_text, function_parameters.ptr2, string_view).size;
         } break;
         case TestParametersType_SizeSize:
         {
             TestParameters_SizeSize function_parameters = (TestParameters_SizeSize)test.size_size;
-            size += push_string8_format(arena, String8Literal("%-10S(1st) %u\n"), size_text, function_parameters.size1).size;
-            size += push_string8_format(arena, String8Literal("%-10S(2nd) %u\n"), size_text, function_parameters.size2).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %u\n"), size_text, function_parameters.size1).size;
+            size += push_string8_format(arena, String8Literal("2nd arg %-10S %u\n"), size_text, function_parameters.size2).size;
         } break;
         case TestParametersType_Size:
         {
             TestParameters_Size function_parameters = (TestParameters_Size)test.size;
-            size += push_string8_format(arena, String8Literal("%-10S %u\n"), size_text, function_parameters.size).size;
+            size += push_string8_format(arena, String8Literal("1st arg %-10S %u\n"), size_text, function_parameters.size).size;
         } break;
     }
     size += push_string8_format(arena, String8Literal("\n")).size;
@@ -205,68 +204,67 @@ U64 push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayl
 {
 
     U64 size = 0;
-    size += push_string8_format(arena, String8Literal("[Return values comparison]:\n")).size;
     String8 expected_return_text = String8Literal("(Expected return value)");
     String8 got_return_text      = String8Literal("(Got return value)     ");
     switch(test_group->function_return_type)
     {
         case TestReturnType_Void:
         {
-            size += push_string8_format(arena, String8Literal("%S(Void)\n"), expected_return_text).size;
-            size += push_string8_format(arena, String8Literal("%S(Void)\n"), got_return_text).size;
+            size += push_string8_format(arena, String8Literal("%S Void\n"), expected_return_text).size;
+            size += push_string8_format(arena, String8Literal("%S Void\n"), got_return_text).size;
         } break;
         case TestReturnType_Int:
         {
-            size += push_string8_format(arena, String8Literal("%S(Int) %i\n"), expected_return_text, payload->expected_value).size;
-            size += push_string8_format(arena, String8Literal("%S(Int) %i\n"), got_return_text, payload->got_value).size;
+            size += push_string8_format(arena, String8Literal("%S Int: %i\n"), expected_return_text, payload->expected_value).size;
+            size += push_string8_format(arena, String8Literal("%S Int: %i\n"), got_return_text, payload->got_value).size;
         } break;
         case TestReturnType_Size:
         {
-            size += push_string8_format(arena, String8Literal("%S(Size) %u\n"), expected_return_text, payload->expected_value).size;
-            size += push_string8_format(arena, String8Literal("%S(Size) %u\n"), got_return_text, payload->got_value).size;
+            size += push_string8_format(arena, String8Literal("%S Size: %u\n"), expected_return_text, payload->expected_value).size;
+            size += push_string8_format(arena, String8Literal("%S Size: %u\n"), got_return_text, payload->got_value).size;
         } break;
         case TestReturnType_Ptr:
         {
-            size += push_string8_format(arena, String8Literal("%S(Pointer) %p\n"), expected_return_text, (void *)payload->expected_value).size;
-            size += push_string8_format(arena, String8Literal("%S(Pointer) %p\n"), got_return_text, (void *)payload->got_value).size;
+            size += push_string8_format(arena, String8Literal("%S Pointer: %p\n"), expected_return_text, (void *)payload->expected_value).size;
+            size += push_string8_format(arena, String8Literal("%S Pointer: %p\n"), got_return_text, (void *)payload->got_value).size;
         } break;
     }
 
     if(payload->expected_strings_sizes_count > 0 || payload->got_strings_sizes_count > 0)
     {
-        size += push_string8_format(arena, String8Literal("\n[Additional results comparison]:\n")).size;
+        size += push_string8_format(arena, String8Literal("\n[Additional results comparison]\n")).size;
 
-        size += push_string8_format(arena, String8Literal("(Indexed)(Expected results)(String View):\n")).size;
+        size += push_string8_format(arena, String8Literal("(Expected results)(String View):\n")).size;
         U64 buffer_for_expected_offset = 0;
         for(U64 string_index = 0; string_index < payload->expected_strings_sizes_count; string_index += 1)
         {
             U8 *start = payload->buffer_for_expected + buffer_for_expected_offset;
-            U64 size  = payload->expected_strings_sizes[string_index];
+            U64 string_size  = payload->expected_strings_sizes[string_index];
 
-            size += push_string8_format(arena, String8Literal("(%u) %S\n"), string_index, (String8){ .str = start, .size = size }).size;
+            size += push_string8_format(arena, String8Literal("(%u) %S\n"), string_index, (String8){ .str = start, .size = string_size }).size;
 
-            buffer_for_expected_offset += size;
+            buffer_for_expected_offset += string_size;
         }
 
         U64 buffer_for_got_offset = 0;
-        size += push_string8_format(arena, String8Literal("(Indexed)(Got results)(String View):\n")).size;
+        size += push_string8_format(arena, String8Literal("(Got results)(String View):\n")).size;
         for(U64 string_index = 0; string_index < payload->got_strings_sizes_count; string_index += 1)
         {
             U8 *start = payload->buffer_for_got + buffer_for_got_offset;
-            U64 size  = payload->got_strings_sizes[string_index];
+            U64 string_size  = payload->got_strings_sizes[string_index];
 
-            size += push_string8_format(arena, String8Literal("(%u) %S\n"), string_index, (String8){ .str = start, .size = size }).size;
+            size += push_string8_format(arena, String8Literal("(%u) %S\n"), string_index, (String8){ .str = start, .size = string_size}).size;
 
-            buffer_for_got_offset += size;
+            buffer_for_got_offset += string_size;
         }
 
-        size += push_string8_format(arena, String8Literal("\n(Indexed)(Expected results)(Memory View):\n")).size;
+        size += push_string8_format(arena, String8Literal("\n(Expected results)(Memory View):\n")).size;
         buffer_for_expected_offset = 0;
         for(U64 string_index = 0; string_index < payload->expected_strings_sizes_count; string_index += 1)
         {
             U8 *start = payload->buffer_for_expected + buffer_for_expected_offset;
-            U64 size  = payload->expected_strings_sizes[string_index];
-            String8 string = (String8){ .str = start, .size = size };
+            U64 string_size  = payload->expected_strings_sizes[string_index];
+            String8 string = (String8){ .str = start, .size = string_size };
 
             size += push_string8_format(arena, String8Literal("(%u) "), string_index, string).size;
             for(U64 byte_index = 0; byte_index < string.size; byte_index += 1)
@@ -275,16 +273,16 @@ U64 push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayl
             }
             size += push_string8_format(arena, String8Literal("\n")).size;
 
-            buffer_for_expected_offset += size;
+            buffer_for_expected_offset += string_size;
         }
 
-        size += push_string8_format(arena, String8Literal("\n(Indexed)(Expected results)(Memory View):\n")).size;
+        size += push_string8_format(arena, String8Literal("\n(Got results)(Memory View):\n")).size;
         buffer_for_got_offset = 0;
         for(U64 string_index = 0; string_index < payload->got_strings_sizes_count; string_index += 1)
         {
             U8 *start = payload->buffer_for_got + buffer_for_got_offset;
-            U64 size  = payload->got_strings_sizes[string_index];
-            String8 string = (String8){ .str = start, .size = size };
+            U64 string_size  = payload->got_strings_sizes[string_index];
+            String8 string = (String8){ .str = start, .size = string_size };
 
             size += push_string8_format(arena, String8Literal("(%u) "), string_index, string).size;
             for(U64 byte_index = 0; byte_index < string.size; byte_index += 1)
@@ -293,7 +291,7 @@ U64 push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayl
             }
             size += push_string8_format(arena, String8Literal("\n")).size;
 
-            buffer_for_got_offset += size;
+            buffer_for_got_offset += string_size;
         }
     }
     return(size);
@@ -323,17 +321,17 @@ String8 debug_info_from_payload(DebugInfoBuilder *info)
             *(info->header_was_not_copied) = 0;
         }
 
-        result.size += push_string8_format(info->arena, String8Literal(">>>(Start of test report)>>>\n")).size;
+        result.size += push_string8_format(info->arena, String8Literal("\n\n>>>>>>(Start of test report)<<<<<<\n")).size;
         result.size += push_function_parameters_from_test_group(info->arena, info->group, info->test_index);
 
         if(!(info->payload->flags & TestPayloadFlag_ResultsMatch))
         {
-            result.size += push_string8_format(info->arena, String8Literal("Note: Function did >>NOT<< return correct results.\n\n")).size;
+            result.size += push_string8_format(info->arena, String8Literal("Function did NOT return correct results.\n")).size;
             result.size += push_results_from_test_payload(info->arena, info->group, info->payload);
         }
         else
         {
-            result.size += push_string8_format(info->arena, String8Literal("Note: Function did return correct results.\n\n")).size;
+            result.size += push_string8_format(info->arena, String8Literal("Function did return correct results.\n")).size;
         }
 
         if(info->payload->crash_signal != 0)
