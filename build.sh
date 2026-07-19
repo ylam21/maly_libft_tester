@@ -46,7 +46,7 @@ elif [[ "$OS_NAME" = "Darwin" ]]; then
     $COMPILER                           \
     $CFLAGS                             \
     $TESTER_SOURCE_FILE                 \
-    -Wl,-force_load -Wl,"$INPUT_PATH"   \
+    -Wl,-force_load -Wl,"$LIBFT_ARCHIVE_PATH" \
     $ALLOWED_UNDEFINED                  \
     $LDFLAGS                            \
     -o $NAME
