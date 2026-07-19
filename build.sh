@@ -29,7 +29,9 @@ if [[ "$OS_NAME" = "Linux" ]]; then
 elif [[ "$OS_NAME" = "Darwin" ]]; then
     LDFLAGS="-lm"
 
-    # We map all libft functions to the -U flag (allow undefined) to prevent linking errors.
+    # The Mach-O linker requires explicit permission to leave missing weak symbols as NULL.
+    # We map all libft functions to the -U flag (allow undefined) to prevent linking errors
+    # if a student didn't complete the bonus part or missed a function.
     ALLOWED_UNDEFINED=""
     for func in ft_isalpha ft_isdigit ft_isalnum ft_isascii ft_isprint ft_strlen ft_memset \
                 ft_bzero ft_memcpy ft_memmove ft_strlcpy ft_strlcat ft_toupper ft_tolower \
@@ -41,12 +43,12 @@ elif [[ "$OS_NAME" = "Darwin" ]]; then
         ALLOWED_UNDEFINED="$ALLOWED_UNDEFINED -Wl,-U,_$func"
     done
 
-    $COMPILER                         \
-    $CFLAGS                           \
-    $TESTER_SOURCE_FILE               \
-    -Wl,-force_load,"$INPUT_PATH"     \
-    $ALLOWED_UNDEFINED                \
-    $LDFLAGS                          \
+    $COMPILER                           \
+    $CFLAGS                             \
+    $TESTER_SOURCE_FILE                 \
+    -Wl,-force_load -Wl,"$INPUT_PATH"   \
+    $ALLOWED_UNDEFINED                  \
+    $LDFLAGS                            \
     -o $NAME
 
 else
