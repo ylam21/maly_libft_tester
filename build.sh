@@ -50,7 +50,6 @@ elif [[ "$OS_NAME" = "Darwin" ]]; then
     -Wl,-force_load -Wl,"$LIBFT_ARCHIVE_PATH" \
     $ALLOWED_UNDEFINED                  \
     $LDFLAGS                            \
-    -pie                                \
     -o $NAME
 else
     echo "Error: OS '$OS_NAME' not supported."
