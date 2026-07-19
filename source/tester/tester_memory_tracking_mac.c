@@ -1,10 +1,13 @@
-#undef malloc
-#undef free
+#include <stdlib.h>
+#include <string.h>
 
-extern void *malloc(size_t size);
-extern void free(void *ptr);
+extern thread_static S64 thread_static_allocation_count;
 
-// Tester Memory Tracking Wrapper Functions
+// Native Mach-O DYLD Interposing macro
+#define DYLD_INTERPOSE(_replacement,_replacee) \
+   __attribute__((used)) static struct{ const void* replacement; const void* replacee; } _interpose_##_replacee \
+            __attribute__ ((section ("__DATA,__interpose"))) = { (const void*)(unsigned long)&_replacement, (const void*)(unsigned long)&_replacee };
+
 void *__wrap_malloc(size_t size)
 {
     void *ptr = malloc(size);
@@ -13,7 +16,7 @@ void *__wrap_malloc(size_t size)
         memset(ptr, 0xCC, size);
         thread_static_allocation_count += 1;
     }
-    return(ptr);
+    return ptr;
 }
 
 void __wrap_free(void *ptr)
@@ -25,5 +28,6 @@ void __wrap_free(void *ptr)
     }
 }
 
-#define malloc  __wrap_malloc
-#define free    __wrap_free
+// Register the hooks
+DYLD_INTERPOSE(__wrap_malloc, malloc)
+DYLD_INTERPOSE(__wrap_free, free)
