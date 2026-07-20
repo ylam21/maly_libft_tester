@@ -1,6 +1,6 @@
 # The Maly Libft Tester
 
-[The Maly Libft Tester Showcase Video on Youtube](https://www.youtube.com/watch?v=XR_jeUo_uzU) (version 1.0.2)
+[The Maly Libft Tester Showcase Video on Youtube](https://www.youtube.com/watch?v=tkeJa7gTiRA) (1.1.0)
 
 Currently up-to-date with Libft subject version 19.2.
 

@@ -1,7 +1,12 @@
+#if   OS_LINUX
+    #include "tester_memory_tracking_linux.c"
+#elif OS_MAC
+    #include "tester_memory_tracking_mac.c"
+#endif
+
 #include "tester.c"
 #include "tester_command_line_parser.c"
 #include "tester_summary.c"
-#include "tester_memory_tracking.c"
 #include "tester_debug_information_builder.c"
 
 // Part 1 - Libc Functions

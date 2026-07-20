@@ -15,6 +15,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 ////////////////////////////////
 // Codebase Keywords
@@ -26,7 +27,7 @@
 #if   COMPILER_CLANG && OS_LINUX
     #define read_only __attribute__((section(".rodata")))
 #elif COMPILER_CLANG && OS_MAC
-    #define read_only __attribute__((section("__TEXT,__const")))
+    #define read_only __attribute__((section("__DATA,__const")))
 #else
     #define read_only
 #endif
