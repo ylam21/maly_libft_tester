@@ -4,7 +4,7 @@
 
 Currently up-to-date with Libft subject version 19.2.
 
-This tester executes over 500 tests in under 0.02 seconds.<br>
+A fast, cross-platform (Linux/macOS) Libft tester for 42 students. This tester executes over 500 tests in under 0.02 seconds.<br>
 
 # Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -17,8 +17,8 @@ This tester executes over 500 tests in under 0.02 seconds.<br>
 ![Tester UI](assets/tester_ui.png)
 
 # Prerequisites
-*   Linux
-*   GCC compiler
+*   Linux or MacOS
+*   GCC or Clang compiler
 *   Your compiled libft.a library
 
 # Building and Running the Tester
@@ -38,7 +38,7 @@ For more information about command-line arguments that can be parsed, run:
 ```
 # What this tester DOES check
 *   Checks correct outputs for all Libft functions.<br>
-*   Checks memory leaks using linker-level wrapping.
+*   Checks memory leaks (using linker-level wrapping on Linux and flat namespace overrides on macOS).<br>
 *   Checks segmentation faults, timeouts, bus errors, double frees using process isolation.<br>
 *   Provides detailed hex and string memory dumps in failed_reports.txt for any failed tests.<br>
 
