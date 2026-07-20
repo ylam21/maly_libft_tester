@@ -1,17 +1,18 @@
 #include <stdlib.h>
 #include <string.h>
+#include <malloc/malloc.h>
 
-extern thread_static S64 thread_static_allocation_count;
+void *__wrap_malloc(size_t size) {
+    return malloc(size);
+}
+void __wrap_free(void *ptr) {
+    free(ptr);
+}
 
-// Native Mach-O DYLD Interposing macro
-#define DYLD_INTERPOSE(_replacement,_replacee) \
-   __attribute__((used)) static struct{ const void* replacement; const void* replacee; } _interpose_##_replacee \
-            __attribute__ ((section ("__DATA,__interpose"))) = { (const void*)(unsigned long)&_replacement, (const void*)(unsigned long)&_replacee };
-
-void *__wrap_malloc(size_t size)
+void *malloc(size_t size)
 {
-    void *ptr = malloc(size);
-    if(ptr != NULL)
+    void *ptr = malloc_zone_malloc(malloc_default_zone(), size);
+    if (ptr != NULL)
     {
         memset(ptr, 0xCC, size);
         thread_static_allocation_count += 1;
@@ -19,15 +20,11 @@ void *__wrap_malloc(size_t size)
     return ptr;
 }
 
-void __wrap_free(void *ptr)
+void free(void *ptr)
 {
-    if(ptr != NULL)
+    if (ptr != NULL)
     {
         thread_static_allocation_count -= 1;
-        free(ptr);
+        malloc_zone_free(malloc_default_zone(), ptr);
     }
 }
-
-// Register the hooks
-DYLD_INTERPOSE(__wrap_malloc, malloc)
-DYLD_INTERPOSE(__wrap_free, free)
