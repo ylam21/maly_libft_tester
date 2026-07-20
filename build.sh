@@ -6,6 +6,11 @@ if [ -z "$LIBFT_ARCHIVE_PATH" ]; then
     exit 1
 fi
 
+if [ ! -f "$LIBFT_ARCHIVE_PATH" ]; then
+    echo "Error: Archive file '$LIBFT_ARCHIVE_PATH' not found."
+    exit 1
+fi
+
 NAME="tester"
 OS_NAME=$(uname -s)
 COMPILER=gcc
