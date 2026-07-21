@@ -93,8 +93,8 @@ void tester_run(Tester *tester)
         Assert(workers[thread_index].local_test_groups_report.size  < (report_size_for_test_group * workers[thread_index].local_test_groups_tested));
         Assert(workers[thread_index].local_test_groups_summary.size < summary_size_for_test_group);
 
-        write(STDOUT_FILENO, workers[thread_index].local_test_groups_summary.str, workers[thread_index].local_test_groups_summary.size);
     }
+    write(STDOUT_FILENO, shared_test_group_summary_start, summary_size_for_all_test_groups);
 
     tester->report.str  = test_groups_report_buffer;
     tester->report.size = test_groups_report_buffer_offset;
