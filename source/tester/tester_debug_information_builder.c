@@ -317,7 +317,7 @@ String8 debug_info_from_payload(DebugInfoBuilder *info)
             result.size += push_string8_format(info->arena, String8Literal("----------------------------------------\n")).size;
             result.size += push_string8_format(info->arena, String8Literal("(Start of debug info for failed test group %S)\n"), info->group->name).size;
             result.size += push_string8_format(info->arena, String8Literal("See '%S' file for tests definitions for this group.\n"), info->group->file).size;
-            result.size += push_string8_format(info->arena, String8Literal("See test index attached to know where to seek for more information about the test.\n\n")).size;
+            result.size += push_string8_format(info->arena, String8Literal("See test index attached to know where to seek for more information about the test.\n")).size;
             *(info->header_was_not_copied) = 0;
         }
 
@@ -376,7 +376,7 @@ String8 debug_info_from_payload(DebugInfoBuilder *info)
             result.size += push_string8_format(info->arena, String8Literal("%S %i %S not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, object_text, info->group->name).size;
         }
 
-        result.size += push_string8_format(info->arena, String8Literal("<<<(End of test report)<<<\n\n")).size;
+        result.size += push_string8_format(info->arena, String8Literal("\n(End of test report)\n")).size;
     }
     return(result);
 }

@@ -13,3 +13,7 @@ failed_reports.txt
 *~
 .vscode/
 .idea/
+o
+
+# Raddebuger
+tester.rdi

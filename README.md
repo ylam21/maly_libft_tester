@@ -28,13 +28,13 @@ Pass the path to your compiled `libft.a` archive as the only argument.
 ```bash
 ./build.sh <path/to/libft.a>
 ```
-Run the tests:
+Run the tester:
 ```bash
 ./tester
 ```
 For more information about command-line arguments that can be parsed, run:
 ```bash
-./tester --help
+./tester help
 ```
 # What this tester DOES check
 *   Checks correct outputs for all Libft functions.<br>
@@ -50,17 +50,16 @@ For more information about command-line arguments that can be parsed, run:
 *   Does NOT check for any README requirements.<br>
 
 # Setting up automated tests in your Makefile
-Create one variable for the Tester's directory and one for its arguments.<br>
-Make sure to update the path to point to where you cloned the tester:<br>
+Create one variable for the Tester's directory path and one for optional Tester's arguments.<br>
 ```make
-#  The Maly Libft Tester Setup for Makefile
-TESTER_DIRECTORY := ../maly_libft_tester
+#  Example setup
+TESTER_DIRECTORY_PATH := ../maly_libft_tester
 TESTER_ARGUMENTS := --set-timeout-ms 50
 ```
 Create a new rule named test:
 ```make
 test: $(NAME)
-	$(TESTER_DIRECTORY)/build.sh ./$(NAME)
+	$(TESTER_DIRECTORY_PATH)/build.sh ./$(NAME)
 	./tester $(TESTER_ARGUMENTS)
 ```
 And declare it as .PHONY so it always runs:

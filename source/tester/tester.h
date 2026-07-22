@@ -13,7 +13,7 @@
 
 #define TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP_NO_COLORS 128         // Note: This is tested safe value. Do not change.
 #define TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP           512         // Note: This is tested safe value. Do not change.
-#define TESTER_DEFAULT_REPORT_SIZE_FOR_TEST                  Thousand(1) // Note: This is tested safe value. Do not change.
+#define TESTER_DEFAULT_DEBUG_REPORT_SIZE_FOR_TEST            Thousand(1) // Note: This is tested safe value. Do not change.
 
 #define TESTER_MAXIMUM_TEST_GROUP_COUNT         42 // 42 was counted in source/tester/tester.c
 #define TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT    26 // Currently, max tests written is 26 tests for ft_memmove
@@ -248,7 +248,7 @@ struct TestWorkerContext
     U32         local_tests_skipped;
 
     String8     local_test_groups_summary;
-    String8     local_test_groups_report;
+    String8     local_test_groups_debug_report;
 };
 
 struct TestGroup
@@ -267,7 +267,7 @@ struct Tester
 {
     Arena       *permanent_arena;
 
-    String8     report;
+    String8     debug_report;
 
     U32         total_test_groups_tested;
     U64         total_tests_passed;
@@ -284,7 +284,7 @@ struct Tester
 };
 
 // Globals
-read_only global String8 global_tester_version                         = String8Literal("1.2.0");
+read_only global String8 global_tester_version                         = String8Literal("1.2.1");
 read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
 read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");

@@ -59,13 +59,13 @@ void print_tester_summary(Tester *tester, F64 time_taken)
     }
     summary.size += push_string8_format(scratch.arena, String8Literal("\n")).size;
 
-    if(tester->report.size != 0)
+    if(tester->debug_report.size != 0)
     {
         char *filename = tester->output_filename;
         int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0777);
         if(fd != -1)
         {
-            if(write(fd, tester->report.str, tester->report.size) != -1)
+            if(write(fd, tester->debug_report.str, tester->debug_report.size) != -1)
             {
                 summary.size += push_string8_format(scratch.arena, String8Literal("See '%s' for more debug information.\n"), filename).size;
             }
