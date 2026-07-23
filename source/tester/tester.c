@@ -12,22 +12,30 @@ String8 tester_get_supported_libft_subject_version(void)
 }
 
 internal_function
-Tester initialize_tester(void)
+void initialize_tester(Tester *tester)
 {
-    Tester tester = {0};
+    tester->permanent_arena = arena_create();
 
-    tester.permanent_arena = arena_create();
-    tester.flags           = TESTER_DEFAULT_FLAGS;
-    tester.output_filename = TESTER_DEFAULT_OUTPUT_FILENAME;
+    tester->debug_report = (String8){0};
 
-    global_dev_null_fd = open("/dev/null", O_WRONLY);
+    tester->total_test_groups_tested = 0;
+    tester->total_tests_passed       = 0;
+    tester->total_tests_failed       = 0;
+    tester->total_tests_leaked       = 0;
+    tester->total_tests_crashed      = 0;
+    tester->total_tests_timedout     = 0;
+    tester->total_tests_skipped      = 0;
+
+    tester->output_filename = TESTER_DEFAULT_OUTPUT_FILENAME;
 
     struct itimerval timeout = {0};
     timeout.it_value.tv_sec  = 0;
     timeout.it_value.tv_usec = TESTER_DEFAULT_TIMEOUT_MS * Thousand(1);
-    tester.timeout = timeout;
+    tester->timeout = timeout;
 
-    return(tester);
+    tester->flags = TESTER_DEFAULT_FLAGS;
+
+    global_dev_null_fd = open("/dev/null", O_WRONLY);
 }
 
 internal_function
@@ -49,9 +57,8 @@ void tester_run(Tester *tester)
     pthread_t *threads         = push_array(tester->permanent_arena, pthread_t        , thread_count);
     TestWorkerContext *workers = push_array(tester->permanent_arena, TestWorkerContext, thread_count);
 
-    U32 test_group_count = TESTER_MAXIMUM_TEST_GROUP_COUNT;
-    U64 chunk_size       = test_group_count / thread_count;
-    U64 remainder        = test_group_count % thread_count;
+    U64 total_tests = TESTER_TOTAL_TEST_COUNT;
+    U64 target_test_count_for_thread = total_tests / thread_count;
 
     U64 current_test_group_index = 0;
     for(U64 thread_index = 0; thread_index < thread_count; thread_index += 1)
@@ -60,17 +67,36 @@ void tester_run(Tester *tester)
 
         worker->timeout = tester->timeout;
         worker->flags   = tester->flags;
-
         worker->test_group_start_index = current_test_group_index;
-        U64 test_groups_for_this_thread = chunk_size + (thread_index < remainder ? 1 : 0);
-        worker->test_group_end_index = current_test_group_index + test_groups_for_this_thread;
 
-        worker->local_test_groups_summary.str = shared_summary_start + (summary_size_for_test_group * current_test_group_index);
-        worker->local_test_groups_debug_report.str = shared_debug_report_start + (debug_report_size_for_test_group * current_test_group_index);
+        U64 accumulated_tests = 0;
+        U64 test_groups_for_this_thread = 0;
 
-        current_test_group_index += test_groups_for_this_thread;
+        if(thread_index == (thread_count - 1))
+        {
+            test_groups_for_this_thread = TESTER_MAXIMUM_TEST_GROUP_COUNT - current_test_group_index;
+        }
+        else
+        {
+            for(U64 test_group_index = current_test_group_index; test_group_index < TESTER_MAXIMUM_TEST_GROUP_COUNT; test_group_index += 1)
+            {
+                accumulated_tests += global_test_groups[test_group_index]->test_count;
+                test_groups_for_this_thread += 1;
+                if(accumulated_tests >= target_test_count_for_thread) break;
+            }
+        }
 
-        pthread_create(&threads[thread_index], 0, worker_thread_routine, worker);
+        if(test_groups_for_this_thread > 0)
+        {
+            worker->test_group_end_index = current_test_group_index + test_groups_for_this_thread;
+
+            worker->local_test_groups_summary.str = shared_summary_start + (summary_size_for_test_group * current_test_group_index);
+            worker->local_test_groups_debug_report.str = shared_debug_report_start + (debug_report_size_for_test_group * current_test_group_index);
+
+            current_test_group_index += test_groups_for_this_thread;
+
+            pthread_create(&threads[thread_index], 0, worker_thread_routine, worker);
+        }
     }
 
     // We need to concatanate test groups debug reports.
@@ -92,7 +118,7 @@ void tester_run(Tester *tester)
         MemoryCopyString8(shared_debug_report_start + shared_debug_report_buffer_offset, worker->local_test_groups_debug_report);
         shared_debug_report_buffer_offset += worker->local_test_groups_debug_report.size;
 
-        Assert(worker->local_test_groups_summary.size < summary_size_for_test_group);
+        AssertAlways(worker->local_test_groups_summary.size <= (summary_size_for_test_group * worker->local_test_groups_tested));
     }
 
     AssertAlways(shared_debug_report_buffer_offset <= debug_report_size_for_all_test_groups);

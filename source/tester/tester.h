@@ -17,6 +17,7 @@
 
 #define TESTER_MAXIMUM_TEST_GROUP_COUNT         42 // 42 was counted in source/tester/tester.c
 #define TESTER_MAXIMUM_TESTS_FOR_GROUP_COUNT    26 // Currently, max tests written is 26 tests for ft_memmove
+#define TESTER_TOTAL_TEST_COUNT                 509
 
 // Tester Types
 typedef U8 TestReturnType;
@@ -216,6 +217,7 @@ enum
 // Layout of a mask that is used in source/tester/test/tester_test.c
 // 0b 0000 0000 0000 0000
 // 0b 0000 0000 0111 1111  -> mask: 0x007f
+read_only global U32 global_test_report_error_mask = 0x007f;
 
 typedef struct TestGroup TestGroup;
 typedef struct TestReport TestReport;
@@ -278,7 +280,6 @@ struct Tester
     U64         total_tests_skipped;
 
     char             *output_filename;
-    int              dev_null_fd;
     struct itimerval timeout;
     TesterFlags      flags;
 };
@@ -288,6 +289,7 @@ read_only global String8 global_tester_version                         = String8
 read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
 read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
+read_only global String8 global_error_for_test_group_text = String8Literal("tests failed to execute");
 read_only global String8 global_null_text = String8Literal("(null)");
 read_only global String8 global_color_table_for_characters[]  =
 {
@@ -313,6 +315,6 @@ global int global_dev_null_fd = -1;
 internal_function String8    tester_get_version(void);
 internal_function String8    tester_get_supported_libft_subject_version(void);
 internal_function void       tester_run(Tester *tester);
-internal_function Tester     initialize_tester(void);
+internal_function void       initialize_tester(Tester *tester);
 
 #endif // TESTER_H

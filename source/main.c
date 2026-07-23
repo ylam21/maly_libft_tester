@@ -22,7 +22,8 @@ int main(int argument_count, char **arguments)
 
     ProfilerBlockBegin(tester);
 
-    Tester tester = initialize_tester();
+    Tester tester;
+    initialize_tester(&tester);
 
     if(argument_count > 1)
     {

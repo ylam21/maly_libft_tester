@@ -162,9 +162,9 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
         flags |= TestReportFlag_ErrorPipe;
     }
 
-    if(!(flags & 0x007f))
+    TemporaryArena scratch = ScratchArenaBegin(0);
+    if(!(flags & global_test_report_error_mask))
     {
-        TemporaryArena scratch = ScratchArenaBegin(0);
 
         U32 local_tests_passed_before = test_worker->local_tests_passed;
 
@@ -221,15 +221,22 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
         MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
         test_worker->local_test_groups_summary.size += stats_with_padding.size;
 
-        ScratchArenaEnd(scratch);
     }
     else
     {
-        // TODO: handle this case better.
         (void)error_code;
-        Print("Fatal Crash. Exiting Now.\n");
-        exit(1);
+
+        test_worker->local_tests_skipped += test_group->test_count;
+
+        String8 stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_group->test_count);
+        String8 padding = padding_for_stats(scratch.arena, global_error_for_test_group_text.size - 5);
+        String8 stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S%S\n"), global_error_for_test_group_text, padding, stats);
+
+        // Copy the stats
+        MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
+        test_worker->local_test_groups_summary.size += stats_with_padding.size;
     }
+    ScratchArenaEnd(scratch);
 }
 
 internal_function
