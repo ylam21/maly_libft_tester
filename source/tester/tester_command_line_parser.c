@@ -13,14 +13,10 @@ read_only global String8 global_tester_help_text = String8Literal(
     "The Maly Libft Tester - Help\n"
     "The following options may be used when starting the tester from the command line:\n\n"
     "  --set-timeout-ms <base-10 value>\n"
-    "    Set a timeout for testing in milliseconds. There is a max bound value of 5000 (5 seconds) that can be set.\n"
-    "    The defualt tester's timeout is set to 100 milliseconds (0.1 seconds).\n"
-    "    If a test does not finish under the set timeout, then the test is going to be evaluated as failed.\n\n"
-    "  --output <filename>\n"
-    "    Run the tester with provided filename.\n"
-    "    If no output file is set from command line the tester proceeds with its default output filename.\n"
-    "    If any test failes then debug information will be written to this file.\n"
-    "    If all tests pass then no debug information will be written and output file will not be opened.\n\n"
+    "    Set a timeout for testing in milliseconds.\n"
+    "    If a test does not finish under the set timeout, then the test is going to be evaluated as failed.\n"
+    "    There is a max bound value of 5000 (5 seconds) that can be set.\n"
+    "    The defualt tester's timeout is set to 100 milliseconds (0.1 seconds).\n\n"
     "  --no-colors\n"
     "    Run the tester and print text to the terminal window with no colors.\n\n"
     "  --version\n"
@@ -43,20 +39,7 @@ void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument
     {
         String8 argument = string8_from_cstring(arguments[argument_index]);
 
-        if(string8_match(argument, String8Literal("--output")))
-        {
-            if((argument_index + 1) < argument_count)
-            {
-                tester->output_filename = arguments[argument_index + 1];
-                argument_index += 1;
-            }
-            else
-            {
-                Print("Output flag (--output) is not followed by any argument.\n");
-                exit(1);
-            }
-        }
-        else if(string8_match(argument, String8Literal("--set-timeout-ms")))
+        if(string8_match(argument, String8Literal("--set-timeout-ms")))
         {
             if((argument_index + 1) < argument_count)
             {
@@ -70,18 +53,14 @@ void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument
                         Print("You set 5 or more seconds for as timeout.\n");
                         exit(1);
                     }
-                    U64 microseconds = value * Thousand(1);
-                    U64 seconds      = microseconds / Million(1);
-                    microseconds     = microseconds - (seconds * Million(1));
+                    U64 total_microseconds = value * Thousand(1);
+                    U64 seconds = total_microseconds / Million(1);
+                    U64 leftover_microseconds = total_microseconds - (seconds * Million(1));
 
                     struct itimerval timeout = {0};
                     timeout.it_value.tv_sec  = seconds;
-                    timeout.it_value.tv_usec = microseconds;
+                    timeout.it_value.tv_usec = leftover_microseconds;
                     tester->timeout = timeout;
-
-                    // Uncomment these if needed for 'prinf' debugging purposes.
-                    // Print("Timeout was set to %u seconds %u microseconds\n", seconds, microseconds);
-                    // Print("Timeout input was: %u milliseconds\n", value);
                 }
                 else
                 {

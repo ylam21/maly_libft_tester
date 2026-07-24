@@ -31,6 +31,9 @@ internal_function U8         upper_from_char(U8 c);
 internal_function U32        string8_has_base10_digits_only(String8 string);
 internal_function U32        string8_starts_with(String8 string, String8 prefix);
 
+internal_function String8    lower_from_string8(Arena *arena, String8 source);
+internal_function String8    upper_from_string8(Arena *arena, String8 source);
+
 // String to Integer Conversion
 internal_function U64        u64_from_string8(String8 string, U32 radix);
 

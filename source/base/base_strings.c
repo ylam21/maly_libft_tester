@@ -150,6 +150,38 @@ U8 upper_from_char(U8 c)
     return(c);
 }
 
+internal_function
+String8 lower_from_string8(Arena *arena, String8 source)
+{
+    String8 result;
+
+    result.size = source.size;
+    result.str  = push_array(arena, U8, result.size);
+
+    for(U32 char_index = 0; char_index < result.size; char_index += 1)
+    {
+        result.str[char_index] = lower_from_char(source.str[char_index]);
+    }
+
+    return(result);
+}
+
+internal_function
+String8 upper_from_string8(Arena *arena, String8 source)
+{
+    String8 result;
+
+    result.size = source.size;
+    result.str  = push_array(arena, U8, result.size);
+
+    for(U32 char_index = 0; char_index < result.size; char_index += 1)
+    {
+        result.str[char_index] = upper_from_char(source.str[char_index]);
+    }
+
+    return(result);
+}
+
 ////////////////////////////////
 // String8 Format Builder
 

@@ -173,9 +173,8 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
         {
             U8 char_to_print = 'F';
 
-            DebugInfoBuilder info =
+            DebugInfoBuilder context =
             {
-                .arena                 = scratch.arena,
                 .worker                = test_worker,
                 .group                 = test_group,
                 .payload               = &payloads[payload_index],
@@ -183,7 +182,7 @@ void run_all_tests_for_test_group_and_evaluate(TestWorkerContext *test_worker, T
                 .header_was_not_copied = &header_was_not_copied,
                 .test_index            = payload_index,
             };
-            String8 debug_info = debug_info_from_payload(&info);
+            String8 debug_info = debug_info_make(scratch.arena, &context);
 
             MemoryCopyString8(test_worker->local_test_groups_debug_report.str + test_worker->local_test_groups_debug_report.size, debug_info);
             test_worker->local_test_groups_debug_report.size += debug_info.size;

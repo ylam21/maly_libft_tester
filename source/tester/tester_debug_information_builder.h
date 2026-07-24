@@ -6,7 +6,6 @@
 typedef struct DebugInfoBuilder DebugInfoBuilder;
 struct DebugInfoBuilder
 {
-    Arena             *arena;
     TestWorkerContext *worker;
     TestGroup         *group;
     TestPayload       *payload;
@@ -18,7 +17,7 @@ struct DebugInfoBuilder
 // Tester Debug Information Builders Main
 internal_function U64     push_function_parameters_from_test_group(Arena *arena, TestGroup *test_group, U32 test_index);
 internal_function U64     push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayload *payload);
-internal_function String8 debug_info_from_payload(DebugInfoBuilder *info);
+internal_function String8 debug_info_make(Arena *arena, DebugInfoBuilder *context);
 
 // Tester Debug Information Builders Helpers
 internal_function String8 get_memory_view(Arena *arena, void *memory_block);

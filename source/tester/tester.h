@@ -8,7 +8,7 @@
 
 // Tester Default Settings
 #define TESTER_DEFAULT_FLAGS            0
-#define TESTER_DEFAULT_OUTPUT_FILENAME  "failed_reports.txt"
+#define TESTER_DEFAULT_OUTPUT_FILENAME  "debug_info_for_failed_tests.txt"
 #define TESTER_DEFAULT_TIMEOUT_MS       100 // milliseconds
 
 #define TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP_NO_COLORS 128         // Note: This is tested safe value. Do not change.
@@ -285,7 +285,7 @@ struct Tester
 };
 
 // Globals
-read_only global String8 global_tester_version                         = String8Literal("1.2.2");
+read_only global String8 global_tester_version                         = String8Literal("1.2.3");
 read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
 
 read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");

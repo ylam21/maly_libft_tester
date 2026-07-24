@@ -298,85 +298,90 @@ U64 push_results_from_test_payload(Arena *arena, TestGroup *test_group, TestPayl
 }
 
 internal_function
-String8 debug_info_from_payload(DebugInfoBuilder *info)
+String8 debug_info_make(Arena *arena, DebugInfoBuilder *context)
 {
-    String8 result = { .str  = push_array(info->arena, U8, 0) };
+    TemporaryArena scratch = ScratchArenaBegin(arena);
 
-    if(info->payload->flags & TestPayloadFlag_TestPassed)
+    String8 result = { .str  = push_array(arena, U8, 0) };
+
+    if(context->payload->flags & TestPayloadFlag_TestPassed)
     {
-        info->worker->local_tests_passed += 1;
-        *(info->char_to_print) = '.';
+        context->worker->local_tests_passed += 1;
+        *(context->char_to_print) = '.';
     }
     else
     {
-        info->worker->local_tests_failed += 1;
-        *(info->char_to_print) = 'F';
+        context->worker->local_tests_failed += 1;
+        *(context->char_to_print) = 'F';
 
-        if(*(info->header_was_not_copied))
+        if(*(context->header_was_not_copied))
         {
-            result.size += push_string8_format(info->arena, String8Literal("----------------------------------------\n")).size;
-            result.size += push_string8_format(info->arena, String8Literal("(Start of debug info for failed test group %S)\n"), info->group->name).size;
-            result.size += push_string8_format(info->arena, String8Literal("See '%S' file for tests definitions for this group.\n"), info->group->file).size;
-            result.size += push_string8_format(info->arena, String8Literal("See test index attached to know where to seek for more information about the test.\n")).size;
-            *(info->header_was_not_copied) = 0;
+            result.size += push_string8_format(arena, String8Literal("----------------------------------------\n")).size;
+            String8 group_name_upper = upper_from_string8(scratch.arena, context->group->name);
+            result.size += push_string8_format(arena, String8Literal("(Start of debug info for failed test group %S)\n"), group_name_upper).size;
+            result.size += push_string8_format(arena, String8Literal("See '%S' file for tests definitions for this group.\n"), context->group->file).size;
+            result.size += push_string8_format(arena, String8Literal("See test index attached to know where to seek for more information about the test.\n")).size;
+            *(context->header_was_not_copied) = 0;
         }
 
-        result.size += push_string8_format(info->arena, String8Literal("\n\n>>>>>>(Start of test report)<<<<<<\n")).size;
-        result.size += push_function_parameters_from_test_group(info->arena, info->group, info->test_index);
+        result.size += push_string8_format(arena, String8Literal("\n\n>>>>>>(Start of test report)<<<<<<\n")).size;
+        result.size += push_function_parameters_from_test_group(arena, context->group, context->test_index);
 
-        if(!(info->payload->flags & TestPayloadFlag_ResultsMatch))
+        if(!(context->payload->flags & TestPayloadFlag_ResultsMatch))
         {
-            result.size += push_string8_format(info->arena, String8Literal("Function did NOT return correct results.\n")).size;
-            result.size += push_results_from_test_payload(info->arena, info->group, info->payload);
+            result.size += push_string8_format(arena, String8Literal("Function did NOT return correct results.\n")).size;
+            result.size += push_results_from_test_payload(arena, context->group, context->payload);
         }
         else
         {
-            result.size += push_string8_format(info->arena, String8Literal("Function did return correct results.\n")).size;
+            result.size += push_string8_format(arena, String8Literal("Function did return correct results.\n")).size;
         }
 
-        if(info->payload->crash_signal != 0)
+        if(context->payload->crash_signal != 0)
         {
-            if(info->payload->crash_signal == SIGALRM)
+            if(context->payload->crash_signal == SIGALRM)
             {
-                info->worker->local_tests_timedout += 1;
-                *(info->char_to_print) = 'T';
-                U64 seconds      = info->worker->timeout.it_value.tv_sec;
-                U64 milliseconds = info->worker->timeout.it_value.tv_usec / Thousand(1);
-                result.size += push_string8_format(info->arena, String8Literal("%S %us and %ums\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout], seconds, milliseconds).size;
+                context->worker->local_tests_timedout += 1;
+                *(context->char_to_print) = 'T';
+                U64 seconds      = context->worker->timeout.it_value.tv_sec;
+                U64 milliseconds = context->worker->timeout.it_value.tv_usec / Thousand(1);
+                result.size += push_string8_format(arena, String8Literal("%S %us and %ums\n"), global_test_report_error_message_table[TestReportFlag_ErrorTimeout], seconds, milliseconds).size;
             }
             else
             {
-                info->worker->local_tests_crashed += 1;
-                *(info->char_to_print) = 'C';
+                context->worker->local_tests_crashed += 1;
+                *(context->char_to_print) = 'C';
 
-                if(info->payload->crash_signal == SIGSEGV)
+                if(context->payload->crash_signal == SIGSEGV)
                 {
-                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Segmentation Fault (Signal 11)\n")).size;
+                    result.size += push_string8_format(arena, String8Literal("[Error] Test crashed: Segmentation Fault (Signal 11)\n")).size;
                 }
-                else if (info->payload->crash_signal == SIGABRT)
+                else if (context->payload->crash_signal == SIGABRT)
                 {
-                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Double Free or Heap Corruption (Signal 6)\n")).size;
+                    result.size += push_string8_format(arena, String8Literal("[Error] Test crashed: Double Free or Heap Corruption (Signal 6)\n")).size;
                 }
-                else if(info->payload->crash_signal == SIGBUS)
+                else if(context->payload->crash_signal == SIGBUS)
                 {
-                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed: Bus Error (Signal 10)\n")).size;
+                    result.size += push_string8_format(arena, String8Literal("[Error] Test crashed: Bus Error (Signal 10)\n")).size;
                 }
                 else
                 {
-                    result.size += push_string8_format(info->arena, String8Literal("[Error] Test crashed with signal: %u\n"), info->payload->crash_signal).size;
+                    result.size += push_string8_format(arena, String8Literal("[Error] Test crashed with signal: %u\n"), context->payload->crash_signal).size;
                 }
             }
         }
-        else if(!(info->payload->flags & TestPayloadFlag_NoMemoryLeak))
+        else if(!(context->payload->flags & TestPayloadFlag_NoMemoryLeak))
         {
-            info->worker->local_tests_leaked += 1;
-            *(info->char_to_print) = 'M';
-            S64 leak_count = info->payload->leak_count;
+            context->worker->local_tests_leaked += 1;
+            *(context->char_to_print) = 'M';
+            S64 leak_count = context->payload->leak_count;
             String8 object_text = leak_count > 1 ? String8Literal("objects were") : String8Literal("object was");
-            result.size += push_string8_format(info->arena, String8Literal("%S %i %S not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, object_text, info->group->name).size;
+            result.size += push_string8_format(arena, String8Literal("%S %i %S not free'd by %S\n"), global_test_report_error_message_table[TestReportFlag_MemoryLeaked], leak_count, object_text, context->group->name).size;
         }
 
-        result.size += push_string8_format(info->arena, String8Literal("\n(End of test report)\n")).size;
+        result.size += push_string8_format(arena, String8Literal("\n(End of test report)\n")).size;
     }
+
+    ScratchArenaEnd(scratch);
     return(result);
 }
