@@ -20,15 +20,17 @@ TESTER_SOURCE_FILE="$TESTER_DIR/source/main.c"
 
 if [[ "$OS_NAME" = "Linux" ]]; then
     LDFLAGS="-lm -lbsd"
+    LINUX_CFLAGS="$CFLAGS -fno-PIE"
 
     $COMPILER                                   \
-    $CFLAGS                                     \
+    $LINUX_CFLAGS                               \
     $TESTER_SOURCE_FILE                         \
     -Wl,--whole-archive "$LIBFT_ARCHIVE_PATH"   \
     -Wl,--no-whole-archive                      \
     -Wl,--wrap=malloc                           \
     -Wl,--wrap=free                             \
     $LDFLAGS                                    \
+    -no-pie                                     \
     -o $NAME
 
 elif [[ "$OS_NAME" = "Darwin" ]]; then

@@ -118,7 +118,8 @@ void tester_run(Tester *tester)
         MemoryCopyString8(shared_debug_report_start + shared_debug_report_buffer_offset, worker->local_test_groups_debug_report);
         shared_debug_report_buffer_offset += worker->local_test_groups_debug_report.size;
 
-        AssertAlways(worker->local_test_groups_summary.size <= (summary_size_for_test_group * worker->local_test_groups_tested));
+        U64 assigned_groups_for_thread = worker->test_group_end_index - worker->test_group_start_index;
+        AssertAlways(worker->local_test_groups_summary.size <= (summary_size_for_test_group * (assigned_groups_for_thread + 1)));
     }
 
     AssertAlways(shared_debug_report_buffer_offset <= debug_report_size_for_all_test_groups);
