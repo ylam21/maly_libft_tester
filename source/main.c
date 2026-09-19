@@ -1,11 +1,3 @@
-#ifndef BUILD_DEBUG
-    #define BUILD_DEBUG        0
-#endif // BUILD_DEBUG
-
-#ifndef ENABLE_PROFILER
-    #define ENABLE_PROFILER    0
-#endif // ENABLE_PROFILER
-
 #include "base/base_include.h"
 #include "os/os_include.h"
 #include "tester/tester_include.h"
