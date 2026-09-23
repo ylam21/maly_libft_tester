@@ -3,8 +3,8 @@ String8 get_tester_version(Arena *arena)
 {
     String8 result = push_string8_format(arena, String8Literal("Version %S\n"
                                                              "This tester version is up-to-date with Libft subject version - %S\n"
-                                                            ), tester_get_version(),
-                                                               tester_get_supported_libft_subject_version());
+                                                            ), global_tester_version,
+                                                               global_tester_supported_libft_subject_version);
     return(result);
 }
 

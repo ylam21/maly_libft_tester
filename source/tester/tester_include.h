@@ -7,6 +7,7 @@
     #include "tester_memory_tracking_mac.h"
 #endif
 
+#include "tester_version.h"
 #include "tester.h"
 #include "tester_command_line_parser.h"
 #include "tester_summary.h"

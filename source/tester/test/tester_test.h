@@ -93,6 +93,10 @@ WEAK_DECL(t_list *, ft_lstmap, (t_list *lst, void *(*f)(void *), void (*del)(voi
 #define TESTER_MAXIMUM_PAYLOAD_STRINGS      16
 #define TESTER_MAXIMUM_PAYLOAD_BUFFER_SIZE  512
 
+#define TESTER_PART_1_TEST_GROUP_START_INDEX 0
+#define TESTER_PART_2_TEST_GROUP_START_INDEX 22
+#define TESTER_PART_3_TEST_GROUP_START_INDEX 33
+
 typedef U8 TestPayloadFlags;
 enum
 {

@@ -252,39 +252,38 @@ String8 padding_for_stats(Arena *arena, U32 test_count)
 internal_function
 void *worker_thread_routine(void *params)
 {
-    initialize_thread_context(); // Since scratch arenas are thread-local specific, we need to call this function for every worker.
+    initialize_thread_context(); // Since scratch arenas are thread-local specific, we need to call this function for every thread.
     TestWorkerContext *test_worker = (TestWorkerContext *)params;
-
     String8 tester_start_header = {0};
     String8 stats;
     String8 padding;
     String8 stats_with_padding;
     String8 name_with_padding;
-
     TemporaryArena scratch = ScratchArenaBegin(0);
 
     for(U64 test_group_index = test_worker->test_group_start_index; test_group_index < test_worker->test_group_end_index; test_group_index += 1)
     {
-        if(test_group_index == 0)
+        switch(test_group_index)
         {
-            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Testing for Libft Subject Version %S ---\n"
-                                                                                    "\n--- Part 1 - Libc Functions ---\n"), tester_get_supported_libft_subject_version());
-            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
-            test_worker->local_test_groups_summary.size += tester_start_header.size;
+            case TESTER_PART_1_TEST_GROUP_START_INDEX:
+            {
+                tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 1 - Libc Functions ---\n"));
+                MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+                test_worker->local_test_groups_summary.size += tester_start_header.size;
+            } break;
+            case TESTER_PART_2_TEST_GROUP_START_INDEX:
+            {
+                tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 2 - Additional Functions ---\n"));
+                MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+                test_worker->local_test_groups_summary.size += tester_start_header.size;
+            } break;
+            case TESTER_PART_3_TEST_GROUP_START_INDEX:
+            {
+                tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 3 - Linked List Functions ---\n"));
+                MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
+                test_worker->local_test_groups_summary.size += tester_start_header.size;
+            } break;
         }
-        else if(test_group_index == 22)
-        {
-            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 2 - Additional Functions ---\n"));
-            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
-            test_worker->local_test_groups_summary.size += tester_start_header.size;
-        }
-        else if(test_group_index == 33)
-        {
-            tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 3 - Linked List Functions ---\n"));
-            MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
-            test_worker->local_test_groups_summary.size += tester_start_header.size;
-        }
-
         TestGroup *test_group = global_test_groups[test_group_index];
 
         // Copy the group name
@@ -295,24 +294,19 @@ void *worker_thread_routine(void *params)
         if(test_group->libft_function != 0)
         {
             test_worker->local_test_groups_tested += 1;
-
             run_all_tests_for_test_group_and_evaluate(test_worker, test_group);
         }
         else
         {
             test_worker->local_tests_skipped += test_group->test_count;
-
             stats   = push_string8_format(scratch.arena, String8Literal("%2u skipped"), test_group->test_count);
             padding = padding_for_stats(scratch.arena, global_symbol_missing_text.size - 5);
             stats_with_padding = push_string8_format(scratch.arena, String8Literal("%S%S%S\n"), global_symbol_missing_text, padding, stats);
-
             // Copy the stats
             MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, stats_with_padding);
             test_worker->local_test_groups_summary.size += stats_with_padding.size;
         }
     }
-
     ScratchArenaEnd(scratch);
-
     return(0);
 }

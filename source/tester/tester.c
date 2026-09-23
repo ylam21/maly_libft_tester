@@ -1,40 +1,19 @@
 // Tester Functions
 internal_function
-String8 tester_get_version(void)
-{
-    return(global_tester_version);
-}
-
-internal_function
-String8 tester_get_supported_libft_subject_version(void)
-{
-    return(global_tester_supported_libft_subject_version);
-}
-
-internal_function
 void initialize_tester(Tester *tester)
 {
     tester->permanent_arena = arena_create();
-
     tester->debug_report = (String8){0};
-
     tester->total_test_groups_tested = 0;
-    tester->total_tests_passed       = 0;
-    tester->total_tests_failed       = 0;
-    tester->total_tests_leaked       = 0;
-    tester->total_tests_crashed      = 0;
-    tester->total_tests_timedout     = 0;
-    tester->total_tests_skipped      = 0;
-
+    tester->total_tests_passed   = 0;
+    tester->total_tests_failed   = 0;
+    tester->total_tests_leaked   = 0;
+    tester->total_tests_crashed  = 0;
+    tester->total_tests_timedout = 0;
+    tester->total_tests_skipped  = 0;
     tester->output_filename = TESTER_DEFAULT_OUTPUT_FILENAME;
-
-    struct itimerval timeout = {0};
-    timeout.it_value.tv_sec  = 0;
-    timeout.it_value.tv_usec = TESTER_DEFAULT_TIMEOUT_MS * Thousand(1);
-    tester->timeout = timeout;
-
+    tester->timeout = (struct itimerval){ .it_value.tv_usec = TESTER_DEFAULT_TIMEOUT_MS * Thousand(1) };
     tester->flags = TESTER_DEFAULT_FLAGS;
-
     global_dev_null_fd = open("/dev/null", O_WRONLY);
 }
 
@@ -42,7 +21,7 @@ internal_function
 void tester_run(Tester *tester)
 {
     // Preallocate buffer for text that will be printed to STDOUT_FILENO.
-    U64 summary_size_for_test_group      = (tester->flags & TesterFlag_NoColors) ? TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP_NO_COLORS : TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP;
+    U64 summary_size_for_test_group = (tester->flags & TesterFlag_NoColors) ? TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP_NO_COLORS : TESTER_DEFAULT_SUMMARY_SIZE_FOR_TEST_GROUP;
     U64 summary_size_for_all_test_groups = TESTER_MAXIMUM_TEST_GROUP_COUNT * summary_size_for_test_group;
     U8 *shared_summary_start  = push_array(tester->permanent_arena, U8, summary_size_for_all_test_groups);
 
@@ -89,12 +68,9 @@ void tester_run(Tester *tester)
         if(test_groups_for_this_thread > 0)
         {
             worker->test_group_end_index = current_test_group_index + test_groups_for_this_thread;
-
             worker->local_test_groups_summary.str = shared_summary_start + (summary_size_for_test_group * current_test_group_index);
             worker->local_test_groups_debug_report.str = shared_debug_report_start + (debug_report_size_for_test_group * current_test_group_index);
-
             current_test_group_index += test_groups_for_this_thread;
-
             pthread_create(&threads[thread_index], 0, worker_thread_routine, worker);
         }
     }
@@ -118,10 +94,10 @@ void tester_run(Tester *tester)
         MemoryCopyString8(shared_debug_report_start + shared_debug_report_buffer_offset, worker->local_test_groups_debug_report);
         shared_debug_report_buffer_offset += worker->local_test_groups_debug_report.size;
 
-        AssertAlways(worker->local_test_groups_summary.size <= (summary_size_for_test_group * worker->local_test_groups_tested));
+        Assert(worker->local_test_groups_summary.size <= (summary_size_for_test_group * worker->local_test_groups_tested));
     }
 
-    AssertAlways(shared_debug_report_buffer_offset <= debug_report_size_for_all_test_groups);
+    Assert(shared_debug_report_buffer_offset <= debug_report_size_for_all_test_groups);
     tester->debug_report = (String8){ .str = shared_debug_report_start, .size = shared_debug_report_buffer_offset };
 
     write(STDOUT_FILENO, shared_summary_start, summary_size_for_all_test_groups);

@@ -285,9 +285,6 @@ struct Tester
 };
 
 // Globals
-read_only global String8 global_tester_version                         = String8Literal("1.2.3");
-read_only global String8 global_tester_supported_libft_subject_version = String8Literal("19.2");
-
 read_only global String8 global_symbol_missing_text = String8Literal("symbol missing in libft.a");
 read_only global String8 global_error_for_test_group_text = String8Literal("tests failed to execute");
 read_only global String8 global_null_text = String8Literal("(null)");
@@ -312,8 +309,6 @@ read_only global String8 global_test_report_error_message_table[] =
 global int global_dev_null_fd = -1;
 
 // Tester Functions
-internal_function String8    tester_get_version(void);
-internal_function String8    tester_get_supported_libft_subject_version(void);
 internal_function void       tester_run(Tester *tester);
 internal_function void       initialize_tester(Tester *tester);
 
