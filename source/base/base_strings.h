@@ -71,8 +71,7 @@ internal_function void             handle_cstring(Arena *arena, va_list args, Fo
 internal_function void             handle_char(Arena *arena, va_list args, FormatOptions *opt);
 internal_function void             handle_percent_literal(Arena *arena, va_list args, FormatOptions *opt);
 internal_function void             handle_hex_ptr(Arena *arena, va_list args, FormatOptions *opt, U8 table[16]);
-internal_function S32              my_stoa_buf(U8 *buf, S32 x);
-internal_function U32              my_u64toa_buf(U8 *buf, U64 x);
-internal_function U8               my_ftoa_buf(U8 *buf, F64 val, FormatOptions *opt);
+internal_function S32              signed_to_ascii(U8 *buffer, S32 x);
+internal_function U32              unsigned_to_ascii(U8 *buffer, U64 x);
 
 #endif // BASE_STRING_H

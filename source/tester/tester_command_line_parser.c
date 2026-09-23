@@ -1,13 +1,12 @@
 internal_function
 String8 get_tester_version(Arena *arena)
 {
-    String8 result = push_string8_format(arena, String8Literal("Version %S\n"
-                                                             "This tester version is up-to-date with Libft subject version - %S\n"
-                                                            ), global_tester_version,
-                                                               global_tester_supported_libft_subject_version);
+    String8 result = push_string8_format(arena,
+                                         String8Literal("Version %S\nThis tester version is up-to-date with Libft subject version - %S\n"),
+                                         global_tester_version,
+                                         global_tester_supported_libft_subject_version);
     return(result);
 }
-
 
 read_only global String8 global_tester_help_text = String8Literal(
     "The Maly Libft Tester - Help\n"

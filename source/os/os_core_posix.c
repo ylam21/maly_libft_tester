@@ -76,9 +76,11 @@ void os_abort(S32 exit_code)
 internal_function
 U64 os_get_timestamp(void)
 {
-    struct timeval val;
-    gettimeofday(&val, 0);
-    return (OS_TIMER_FREQUENCY * (U64)val.tv_sec) + (U64)val.tv_usec;
+    struct timespec ts;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    return( (OS_TIMER_FREQUENCY * (U64)ts.tv_sec) + (U64)ts.tv_nsec / Thousand(1) );
 }
 
 internal_function

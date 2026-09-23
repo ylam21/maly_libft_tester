@@ -40,5 +40,4 @@ internal_function void   os_abort(S32 exit_code);
 // Globals
 global OS_SystemInfo global_os_system_info = {0};
 
-
 #endif // OS_CORE_H

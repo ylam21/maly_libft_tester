@@ -33,7 +33,7 @@ void tester_run(Tester *tester)
 
     S64 core_count   = sysconf(_SC_NPROCESSORS_ONLN);
     U64 thread_count = MaximumBetween(4, core_count);
-    pthread_t *threads         = push_array(tester->permanent_arena, pthread_t        , thread_count);
+    pthread_t *threads = push_array(tester->permanent_arena, pthread_t, thread_count);
     TestWorkerContext *workers = push_array(tester->permanent_arena, TestWorkerContext, thread_count);
 
     U64 total_tests = TESTER_TOTAL_TEST_COUNT;
@@ -43,14 +43,12 @@ void tester_run(Tester *tester)
     for(U64 thread_index = 0; thread_index < thread_count; thread_index += 1)
     {
         TestWorkerContext *worker = &workers[thread_index];
+        U64 accumulated_tests = 0;
+        U64 test_groups_for_this_thread = 0;
 
         worker->timeout = tester->timeout;
         worker->flags   = tester->flags;
         worker->test_group_start_index = current_test_group_index;
-
-        U64 accumulated_tests = 0;
-        U64 test_groups_for_this_thread = 0;
-
         if(thread_index == (thread_count - 1))
         {
             test_groups_for_this_thread = TESTER_MAXIMUM_TEST_GROUP_COUNT - current_test_group_index;
@@ -64,7 +62,6 @@ void tester_run(Tester *tester)
                 if(accumulated_tests >= target_test_count_for_thread) break;
             }
         }
-
         if(test_groups_for_this_thread > 0)
         {
             worker->test_group_end_index = current_test_group_index + test_groups_for_this_thread;
@@ -74,14 +71,11 @@ void tester_run(Tester *tester)
             pthread_create(&threads[thread_index], 0, worker_thread_routine, worker);
         }
     }
-
     // We need to concatanate test groups debug reports.
     U64 shared_debug_report_buffer_offset = 0;
-
     for(U64 thread_index = 0; thread_index < thread_count; thread_index += 1)
     {
         pthread_join(threads[thread_index], 0);
-
         TestWorkerContext *worker = &workers[thread_index];
         tester->total_test_groups_tested += worker->local_test_groups_tested;
         tester->total_tests_passed       += worker->local_tests_passed;
@@ -90,15 +84,11 @@ void tester_run(Tester *tester)
         tester->total_tests_crashed      += worker->local_tests_crashed;
         tester->total_tests_timedout     += worker->local_tests_timedout;
         tester->total_tests_skipped      += worker->local_tests_skipped;
-
         MemoryCopyString8(shared_debug_report_start + shared_debug_report_buffer_offset, worker->local_test_groups_debug_report);
         shared_debug_report_buffer_offset += worker->local_test_groups_debug_report.size;
-
         Assert(worker->local_test_groups_summary.size <= (summary_size_for_test_group * worker->local_test_groups_tested));
     }
-
     Assert(shared_debug_report_buffer_offset <= debug_report_size_for_all_test_groups);
     tester->debug_report = (String8){ .str = shared_debug_report_start, .size = shared_debug_report_buffer_offset };
-
     write(STDOUT_FILENO, shared_summary_start, summary_size_for_all_test_groups);
 }

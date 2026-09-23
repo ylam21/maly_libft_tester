@@ -1,15 +1,17 @@
 #include "base/base_include.h"
 #include "os/os_include.h"
+#include "third_party/third_party_include.h"
 #include "tester/tester_include.h"
 
 #include "base/base_include.c"
 #include "os/os_include.c"
+#include "third_party/third_party_include.c"
 #include "tester/tester_include.c"
 
 int main(int argument_count, char **arguments)
 {
-    Tester tester;
-    ProfilerReport profiler_report;
+    Tester tester = {0};
+    ProfilerReport profiler_report = {0};
 
     profiler_start();            // Necessary setup for profiling code blocks.
     initialize_os_system_info(); // Necessary setup for creating any new arena.

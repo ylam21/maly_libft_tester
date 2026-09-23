@@ -14,9 +14,9 @@ fi
 NAME="tester"
 OS_NAME=$(uname -s)
 COMPILER=gcc
-CFLAGS="-Wall -Wextra -Werror -Wno-unused-function -Wno-unused-variable"
 TESTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TESTER_SOURCE_FILE="$TESTER_DIR/source/main.c"
+CFLAGS="-Wall -Wextra -Werror -Wno-unused-function -Wno-unused-variable -I$TESTER_DIR/source/third_party"
 
 if [[ "$OS_NAME" = "Linux" ]]; then
     LDFLAGS="-lm -lbsd"

@@ -267,7 +267,7 @@ void *worker_thread_routine(void *params)
         {
             case TESTER_PART_1_TEST_GROUP_START_INDEX:
             {
-                tester_start_header = push_string8_format(scratch.arena, String8Literal("\n--- Part 1 - Libc Functions ---\n"));
+                tester_start_header = push_string8_format(scratch.arena, String8Literal("--- Part 1 - Libc Functions ---\n"));
                 MemoryCopyString8(test_worker->local_test_groups_summary.str + test_worker->local_test_groups_summary.size, tester_start_header);
                 test_worker->local_test_groups_summary.size += tester_start_header.size;
             } break;
