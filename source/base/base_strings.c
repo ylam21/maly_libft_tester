@@ -156,7 +156,7 @@ String8 lower_from_string8(Arena *arena, String8 source)
     String8 result;
 
     result.size = source.size;
-    result.str  = push_array(arena, U8, result.size);
+    result.str  = push_array_no_zero(arena, U8, result.size);
 
     for(U32 char_index = 0; char_index < result.size; char_index += 1)
     {
@@ -172,7 +172,7 @@ String8 upper_from_string8(Arena *arena, String8 source)
     String8 result;
 
     result.size = source.size;
-    result.str  = push_array(arena, U8, result.size);
+    result.str  = push_array_no_zero(arena, U8, result.size);
 
     for(U32 char_index = 0; char_index < result.size; char_index += 1)
     {

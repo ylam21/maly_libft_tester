@@ -43,4 +43,13 @@
     #define OS_POSIX 0
 #endif
 
+// Build Options
+#ifndef BUILD_DEBUG
+    #define BUILD_DEBUG        0
+#endif // BUILD_DEBUG
+
+#ifndef ENABLE_PROFILER
+    #define ENABLE_PROFILER    0
+#endif // ENABLE_PROFILER
+
 #endif // BASE_CONTEXT_CRACKING_H

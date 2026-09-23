@@ -30,12 +30,12 @@ String8 get_tester_help(void)
 }
 
 internal_function
-void parse_command_line_to_tester(Tester *tester, char **arguments, U64 argument_count)
+void parse_command_line_to_tester(Tester *tester, int argument_count, char **arguments)
 {
     String8 message;
     TemporaryArena scratch = ScratchArenaBegin(0);
 
-    for(U64 argument_index = 1; argument_index < argument_count; argument_index += 1)
+    for(int argument_index = 1; argument_index < argument_count; argument_index += 1)
     {
         String8 argument = string8_from_cstring(arguments[argument_index]);
 
