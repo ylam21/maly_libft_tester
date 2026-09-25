@@ -11,7 +11,7 @@ A fast, cross-platform (Linux/macOS) Libft tester for 42 students. This tester e
 2. [Building and Running the Tester](#building-and-running-the-tester)
 3. [What this tester DOES check](#what-this-tester-does-check)
 4. [What this tester does NOT check](#what-this-tester-does-not-check)
-5. [Setting up automated tests in your Makefile](#setting-up-automated-tests-in-your-makefile)
+5. [Setting up automated tests in your Libft Makefile](#setting-up-automated-tests-in-your-libft-makefile)
 6. [Libft Subject Version Compatibility](#libft-subject-version-compatibility)
 7. [Acknowledgments](#acknowledgments)
 ---
@@ -50,7 +50,7 @@ For more information about command-line arguments that can be parsed, run:
 *   Does NOT check if you used any unallowed functions in your project. <br>
 *   Does NOT check for any README requirements.<br>
 
-# Setting up automated tests in your Makefile
+# Setting up automated tests in your Libft Makefile
 Create one variable for the Tester's directory path and one for optional Tester's arguments.<br>
 ```make
 #  Example setup
@@ -73,7 +73,7 @@ fclean: clean
 	$(RM) $(NAME)
 	$(RM) tester
 ```
-That is it!
+That is it! Now, run ```make test``` to build and run the tester.
 
 # Libft Subject Version Compatibility
 This tester currently tracks Libft subject version 19.2. If a newer subject version is released and the tester falls behind, please create an issue so it can be updated. Thank you.
