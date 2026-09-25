@@ -12,39 +12,32 @@ Arena *arena_create_(ArenaParams *params)
 {
     U64 reserve_size = params->reserve_size;
     U64 commit_size  = params->commit_size;
+    void *base = 0;
 
-    // round up reserve/commit sizes
     if(params->flags & ArenaFlag_LargePages)
     {
+        // round up reserve/commit sizes
         reserve_size = AlignPow2(reserve_size, global_os_system_info.large_page_size);
         commit_size  = AlignPow2(commit_size,  global_os_system_info.large_page_size);
-    }
-    else
-    {
-        reserve_size = AlignPow2(reserve_size, global_os_system_info.page_size);
-        commit_size  = AlignPow2(commit_size,  global_os_system_info.page_size);
-    }
-
-    // reserve/commit initial block
-    void *base = 0;
-    if(params->flags & ArenaFlag_LargePages)
-    {
+        // reserve/commit initial block
         base = os_reserve_large(reserve_size);
         os_commit_large(base, commit_size);
     }
     else
     {
+        // round up reserve/commit sizes
+        reserve_size = AlignPow2(reserve_size, global_os_system_info.page_size);
+        commit_size  = AlignPow2(commit_size,  global_os_system_info.page_size);
+        // reserve/commit initial block
         base = os_reserve_memory(reserve_size);
         os_commit_memory(base, commit_size);
     }
-
     // panic on arena creation failure
     if(base == 0)
     {
         os_write_message(String8Literal("[Arena Allocator Error] Unexpected memory allocation failure in arena_create_ .\n"));
         os_abort(1);
     }
-
     // extract arena header & fill
     Arena *arena        = base;
     arena->current      = arena;
@@ -56,8 +49,7 @@ Arena *arena_create_(ArenaParams *params)
     arena->commited     = commit_size;
     arena->reserved     = reserve_size;
     arena->flags        = params->flags;
-
-    return arena;
+    return(arena);
 }
 
 internal_function
