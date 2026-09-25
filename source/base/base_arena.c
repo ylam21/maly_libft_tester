@@ -49,6 +49,7 @@ Arena *arena_create_(ArenaParams *params)
     arena->commited     = commit_size;
     arena->reserved     = reserve_size;
     arena->flags        = params->flags;
+
     return(arena);
 }
 
